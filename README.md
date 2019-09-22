@@ -1,14 +1,14 @@
 # Smart edp
 
-An IoT projec build by an awesome team 
+An IoT project built by an awesome team
 
 ## Getting Started
 
-This repo depends on epd library as a git submodule.
+This repo depends on epd [library](https://github.com/pgatti86/epd) as git submodule.
 
 To clone the project use **git clone --recursive <project url>** 
 
-Project Makefile has the following configuration for include the submodule library in the build process:
+Project Makefile has the following configuration to include the submodule library in the build process:
 
 **EXTRA_COMPONENT_DIRS += $(PROJECT_PATH)/epd/components/**
 

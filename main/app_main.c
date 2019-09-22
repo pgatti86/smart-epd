@@ -17,7 +17,6 @@ static void wifi_manager_callback(int event_id) {
 		  break;
   	  case SYSTEM_EVENT_STA_LOST_IP:
   	  case SYSTEM_EVENT_STA_DISCONNECTED:
-  		  ESP_LOGI(TAG, "disconnecting from mqtt...");
   		  //TODO handle event
   		  break;
 	}
@@ -28,6 +27,7 @@ void app_task(void *pvParameter) {
   ESP_LOGI(TAG, "init epd_manager");
   epd_manager_init();
 
+  ESP_LOGI(TAG, "init wifi_manager");
   wifi_manager_sta_init();
   wifi_manager_set_callback(wifi_manager_callback);
   wifi_manager_connect(true);
