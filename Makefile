@@ -3,6 +3,10 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := blink
+PROJECT_NAME := smart-epd
+EXTRA_COMPONENT_DIRS += $(PROJECT_PATH)/epd/components/
+
 include $(IDF_PATH)/make/project.mk
+
+
 
