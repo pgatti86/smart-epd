@@ -36,7 +36,7 @@ void app_task(void *pvParameter) {
   time_manager_init();
 
   while(1) {
-	vTaskDelay(500 / portTICK_RATE_MS);
+	vTaskDelay(200 / portTICK_RATE_MS);
 	char timestamp_buffer [20];
 	time_manager_format_current_date(timestamp_buffer);
 	epd_manager_write_on_lcd(timestamp_buffer);

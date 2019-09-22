@@ -16,6 +16,10 @@
 
 static const char *TAG = "time_manager";
 
+static char *ISO8601_FORMATTER = "%Y-%m-%dT%H:%M:%SZ";
+
+static char *TIME_FORMATTER = "%d/%m/%Y %H:%M:%S";
+
 static void sync_time_with_ntp() {
 	int retry = 0;
 	const int retry_count = MAX_RETRY_COUNT;
@@ -48,6 +52,7 @@ void time_manager_init() {
 	ESP_LOGI(TAG, "Initializing SNTP");
 	sntp_setoperatingmode(SNTP_OPMODE_POLL);
 	sntp_setservername(0, CONFIG_SNTP_SERVER);
+	setenv("TZ", "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00", 1);
 	sntp_init();
 }
 
@@ -60,7 +65,11 @@ void time_manager_sync_time(bool async) {
 }
 
 bool time_mnager_is_time_synched() {
-	return false; //current_time != 0;
+	time_t current_time;
+	time_info_t timeinfo;
+	time(&current_time);
+	localtime_r(&current_time, &timeinfo);
+	return timeinfo.tm_year > 2000;
 }
 
 void time_manager_format_current_date(char *dst) {
@@ -72,7 +81,7 @@ void time_manager_format_current_date(char *dst) {
 }
 
 void time_manager_format_date(char *dst, time_info_t timeinfo) {
-	strftime(dst, ISO_8601_DATE_LENGTH, "%Y-%m-%dT%H:%M:%SZ", &timeinfo);
+	strftime(dst, ISO_8601_DATE_LENGTH, TIME_FORMATTER, &timeinfo);
 	ESP_LOGI(TAG, "Current date is: %s", dst);
 }
 
