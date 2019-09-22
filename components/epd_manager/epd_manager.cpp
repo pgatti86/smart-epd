@@ -19,7 +19,7 @@ Epd epd;
 
 void epd_manager_init() {
 
-  if (epd.Init(lut_full_update) != 0) {
+  if (epd.Init(lut_partial_update) != 0) {
     ESP_LOGE(TAG, "e-Paper init failed");
     return;
   }
@@ -36,7 +36,7 @@ void epd_manager_init() {
 
 void epd_manager_write_on_lcd(char *str) {
   paint.Clear(UNCOLORED);
-  paint.DrawStringAt(0, 0, str, &Font24, COLORED);
+  paint.DrawStringAt(0, 0, str, &Font20, COLORED);
   epd.SetFrameMemory(paint.GetImage(), 0, 0, paint.GetWidth(), paint.GetHeight());
   epd.DisplayFrame();
 }
