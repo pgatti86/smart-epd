@@ -15,12 +15,13 @@ typedef struct tm time_info_t;
 
 void time_manager_init();
 
-void time_manager_format_current_date(char *dst);
-
-void time_manager_format_date(char *dst, time_info_t timeinfo);
-
 void time_manager_sync_time(bool async);
 
 bool time_mnager_is_time_synched();
 
+void time_manager_format_current_date(char *dst);
+
+void time_manager_format_current_time(char *dst);
+
 #endif /* COMPONENTS_TIME_MANAGER_INCLUDE_TIME_MANAGER_H_ */
+

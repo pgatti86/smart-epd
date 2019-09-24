@@ -13,7 +13,7 @@ extern "C" {
 #endif
 	void epd_manager_init();
 
-	void epd_manager_write_on_lcd(char *str);
+	void epd_manager_update(char *time, char *date);
 
 #ifdef __cplusplus
 }

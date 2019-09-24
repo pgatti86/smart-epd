@@ -13,9 +13,46 @@
 
 static const char *TAG = "EPD MANAGER";
 
+static const int TOP_LINE_Y = 30;
+static const int BOTTOM_LINE_Y = EPD_WIDTH -30;
+
 unsigned char image[EPD_WIDTH*EPD_HEIGHT/8];
 Paint paint(image, 0, 0);    // width should be the multiple of 8
 Epd epd;
+
+static void epd_manager_clear() {
+
+  ESP_LOGI(TAG, "Clearing display...");
+  epd.ClearFrameMemory(0xFF);   // bit set = white, bit reset = black
+  epd.DisplayFrame();
+
+  epd.ClearFrameMemory(0xFF);   // bit set = white, bit reset = black
+  epd.DisplayFrame();
+}
+
+static void epd_manager_apply() {
+
+  epd.SetFrameMemory(paint.GetImage(), 0, 0, paint.GetWidth(), paint.GetHeight());
+  epd.DisplayFrame();
+}
+
+static void epd_manager_draw_grid() {
+
+  paint.DrawHorizontalLine(0, TOP_LINE_Y, EPD_HEIGHT, COLORED);
+
+  //paint.DrawHorizontalLine(0, BOTTOM_LINE_Y, EPD_HEIGHT, COLORED);
+}
+
+static void epd_manager_draw_time(char *time) {
+
+  paint.DrawStringAt(0, 50, time, &Font24, COLORED);
+}
+
+static void epd_manager_draw_date(char *date) {
+
+  int y = (TOP_LINE_Y - 16) / 2;
+  paint.DrawStringAt(180, y, date, &Font16, COLORED);
+}
 
 void epd_manager_init() {
 
@@ -24,19 +61,22 @@ void epd_manager_init() {
     return;
   }
 
-  ESP_LOGE(TAG, "e-Paper initialized");
+  ESP_LOGI(TAG, "e-Paper initialized");
 
-  epd.ClearFrameMemory(0xFF);   // bit set = white, bit reset = black
-  epd.DisplayFrame();
+  epd_manager_clear();
+
   paint.SetRotate(ROTATE_90);
   paint.SetWidth(EPD_WIDTH);
   paint.SetHeight(EPD_HEIGHT);
-  paint.Clear(UNCOLORED);
 }
 
-void epd_manager_write_on_lcd(char *str) {
+void epd_manager_update(char *time, char *date) {
+
   paint.Clear(UNCOLORED);
-  paint.DrawStringAt(0, 0, str, &Font20, COLORED);
-  epd.SetFrameMemory(paint.GetImage(), 0, 0, paint.GetWidth(), paint.GetHeight());
-  epd.DisplayFrame();
+  
+  epd_manager_draw_grid();
+  epd_manager_draw_date(date);
+  epd_manager_draw_time(time);
+  
+  epd_manager_apply();
 }
