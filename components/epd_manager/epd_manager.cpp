@@ -45,7 +45,7 @@ static void epd_manager_draw_grid() {
 
 static void epd_manager_draw_time(char *time) {
 
-  paint.DrawStringAt(0, 50, time, &Font24, COLORED);
+  paint.DrawStringAt(0, 50, time, &Font40, COLORED);
 }
 
 static void epd_manager_draw_date(char *date) {
