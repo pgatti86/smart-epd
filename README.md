@@ -30,4 +30,11 @@ Look for "SMART-EPD config" menù for project settings.
 | RST | GPIO_NUM_27  |
 | BUSY | GPIO_NUM_32  |
 
+## Custom fonts
 
+To create custom fonts you need to generate a PNG file with all required characters (95).
+See this [guide] (https://kapusta.cc/2019/02/10/font2bytes/) for reference
+
+Useful reading: [Making graphics and fonts for embedded systems](https://lb9mg.no/2018/02/10/making-graphics-and-fonts-for-embedded-systems/)
+
+Look at fonts folder for examples.
