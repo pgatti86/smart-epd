@@ -7,6 +7,7 @@
 #include "wifi_manager.h"
 #include "time_manager.h"
 #include "epd_manager.h"
+#include "dht_manager.h"
 
 static const char *TAG = "MAIN";
 
@@ -27,6 +28,10 @@ void app_task(void *pvParameter) {
   ESP_LOGI(TAG, "init epd_manager");
   epd_manager_init();
 
+  ESP_LOGI(TAG, "init dht_manager");
+  setDHTgpio(CONFIG_DHT_GPIO);
+  startReading();
+
   ESP_LOGI(TAG, "init wifi_manager");
   wifi_manager_sta_init();
   wifi_manager_set_callback(wifi_manager_callback);
@@ -46,6 +51,9 @@ void app_task(void *pvParameter) {
     time_manager_format_current_date(date_buffer);
     
     epd_manager_update(time_buffer, date_buffer);
+
+    ESP_LOGI(TAG, "Temperature = %f", getTemperature());
+    ESP_LOGI(TAG, "Humidity = %f", getHumidity());
   }
 }
 
