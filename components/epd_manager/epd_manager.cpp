@@ -8,6 +8,7 @@
 #include "epd2in9.h"
 #include "epdpaint.h"
 #include "esp_log.h"
+#include "epd_images.h"
 
 #include "epd_manager.h"
 
@@ -52,6 +53,8 @@ static void epd_manager_draw_date(char *date) {
 
   int y = (TOP_LINE_Y - 16) / 2;
   paint.DrawStringAt(180, y, date, &Font16, COLORED);
+
+  //epd.SetFrameMemory(calendar_image, 10, 10, 25, 25);
 }
 
 void epd_manager_init() {

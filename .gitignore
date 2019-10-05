@@ -3,3 +3,4 @@ sdkconfig.old
 .cproject
 build/
 .vscode/
+.DS_Store
