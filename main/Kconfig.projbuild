@@ -14,6 +14,10 @@ config ESP_WIFI_PASSWORD
  
 config SNTP_SERVER
     string "SNTP Server"
-	default "pool.ntp.org"
+	  default "pool.ntp.org"
+
+config DHT_GPIO
+    int "DHT GPIO"
+    default 4
 			
 endmenu
