@@ -41,7 +41,7 @@ static void epd_manager_draw_grid() {
 
   paint.DrawHorizontalLine(0, TOP_LINE_Y, EPD_HEIGHT, COLORED);
 
-  //paint.DrawHorizontalLine(0, BOTTOM_LINE_Y, EPD_HEIGHT, COLORED);
+  paint.DrawHorizontalLine(0, BOTTOM_LINE_Y, EPD_HEIGHT, COLORED);
 }
 
 static void epd_manager_draw_time(char *time) {
