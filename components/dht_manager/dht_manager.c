@@ -232,7 +232,7 @@ static void dht_manager_reading_task(void *pvParameter){
 		ESP_LOGI(TAG,"readDHT()");
 		readDHT();
 
-		vTaskDelay(30000 / portTICK_RATE_MS);
+		vTaskDelay(10000 / portTICK_RATE_MS);
 	}
 }
 

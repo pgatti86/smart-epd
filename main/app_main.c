@@ -41,14 +41,15 @@ void app_task(void *pvParameter) {
 
   while(1) {
 
-    vTaskDelay(500 / portTICK_RATE_MS);
-    
     time_info_t dst;
     time_manager_get_current_date_time(&dst);
 
     float t = dht_manager_getTemperature();
     float h = dht_manager_getHumidity();  
+
     epd_manager_update(&dst, t, h);
+
+    vTaskDelay(1000 / portTICK_RATE_MS);
   }
 }
 
