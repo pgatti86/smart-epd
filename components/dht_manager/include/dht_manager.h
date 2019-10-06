@@ -13,9 +13,9 @@
 
 // == function prototypes =======================================
 
-void 	setDHTgpio(int gpio);
-void 	startReading();
-void 	stopReading();
+void 	dht_manager_setDhtGpio(int gpio);
+void 	dht_manager_startReading();
+void 	dht_manager_stopReading();
 void 	errorHandler(int response);
 int 	readDHT();
 float 	getHumidity();

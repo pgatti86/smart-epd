@@ -32,35 +32,34 @@
 
 static const char* TAG = "DHT";
 
-static TaskHandle_t task_handler;
-int DHTgpio = 4;				// my default DHT pin = 4
+static TaskHandle_t dht_task_handler;
+int DHTgpio = CONFIG_DHT_GPIO;
 float humidity = 0.;
 float temperature = 0.;
 
 // == set the DHT used pin=========================================
 
-void setDHTgpio( int gpio )
+void dht_manager_setDHTgpio( int gpio )
 {
 	DHTgpio = gpio;
 }
 
-void reading_task(void *pvParameter){
+static void dht_manager_reading_task(void *pvParameter){
 	while(1) {
 
-		vTaskDelay(2000 / portTICK_RATE_MS);
-
 		ESP_LOGI(TAG,"readDHT()");
-
 		readDHT();
+
+		vTaskDelay(30000 / portTICK_RATE_MS);
 	}
 }
 
-void startReading() {
-	xTaskCreate(&reading_task, "dht_task", 2048, NULL, 5, &task_handler);
+void dht_manager_startReading() {
+	xTaskCreate(&dht_manager_reading_task, "dht_task", 2048, NULL, 5, &dht_task_handler);
 }
 
-void stopReading(){
-	vTaskDelete(task_handler);
+void dht_manager_stopReading(){
+	vTaskDelete(dht_task_handler);
 }
 
 // == get temp & hum =============================================

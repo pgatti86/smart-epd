@@ -29,8 +29,7 @@ void app_task(void *pvParameter) {
   epd_manager_init();
 
   ESP_LOGI(TAG, "init dht_manager");
-  setDHTgpio(CONFIG_DHT_GPIO);
-  startReading();
+  dht_manager_startReading();
 
   ESP_LOGI(TAG, "init wifi_manager");
   wifi_manager_sta_init();
