@@ -37,39 +37,9 @@ int DHTgpio = CONFIG_DHT_GPIO;
 float humidity = 0.;
 float temperature = 0.;
 
-// == set the DHT used pin=========================================
-
-void dht_manager_setDHTgpio( int gpio )
-{
-	DHTgpio = gpio;
-}
-
-static void dht_manager_reading_task(void *pvParameter){
-	while(1) {
-
-		ESP_LOGI(TAG,"readDHT()");
-		readDHT();
-
-		vTaskDelay(30000 / portTICK_RATE_MS);
-	}
-}
-
-void dht_manager_startReading() {
-	xTaskCreate(&dht_manager_reading_task, "dht_task", 2048, NULL, 5, &dht_task_handler);
-}
-
-void dht_manager_stopReading(){
-	vTaskDelete(dht_task_handler);
-}
-
-// == get temp & hum =============================================
-
-float getHumidity() { return humidity; }
-float getTemperature() { return temperature; }
-
 // == error handler ===============================================
 
-void errorHandler(int response)
+static void errorHandler(int response)
 {
 	switch(response) {
 	
@@ -98,7 +68,7 @@ void errorHandler(int response)
 ;
 ;--------------------------------------------------------------------------------*/
 
-int getSignalLevel( int usTimeOut, bool state )
+static int getSignalLevel( int usTimeOut, bool state )
 {
 
 	int uSec = 0;
@@ -156,7 +126,7 @@ To request data from DHT:
 
 #define MAXdhtData 5	// to complete 40 = 5*8 Bits
 
-int readDHT()
+static int readDHT()
 {
 int uSec = 0;
 
@@ -248,4 +218,35 @@ uint8_t bitInx = 7;
 	else 
 		return DHT_CHECKSUM_ERROR;
 }
+
+// == set the DHT used pin=========================================
+
+void dht_manager_setDHTgpio( int gpio )
+{
+	DHTgpio = gpio;
+}
+
+static void dht_manager_reading_task(void *pvParameter){
+	while(1) {
+
+		ESP_LOGI(TAG,"readDHT()");
+		readDHT();
+
+		vTaskDelay(30000 / portTICK_RATE_MS);
+	}
+}
+
+void dht_manager_startReading() {
+	xTaskCreate(&dht_manager_reading_task, "dht_task", 2048, NULL, 5, &dht_task_handler);
+}
+
+void dht_manager_stopReading(){
+	vTaskDelete(dht_task_handler);
+}
+
+// == get temp & hum =============================================
+
+float dht_manager_getHumidity() { return humidity; }
+float dht_manager_getTemperature() { return temperature; }
+
 

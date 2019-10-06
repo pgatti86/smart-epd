@@ -16,14 +16,6 @@
 
 static const char *TAG = "time_manager";
 
-static char *ISO8601_FORMATTER = "%Y-%m-%dT%H:%M:%SZ";
-
-static char *TIME_FORMATTER = "%X";
-
-static char *DATE_FORMATTER = "%d/%m/%Y";
-
-static char *LITERAL_DATE_FORMATTER = "%a %d %b";
-
 static void sync_time_with_ntp() {
 	
 	int retry = 0;
@@ -43,17 +35,6 @@ static void ntp_task(void *pvParameter) {
 
 	sync_time_with_ntp();
 	vTaskDelete(NULL);
-}
-
-static void time_manager_get_current_date_time(time_info_t *dst) {
-	
-	time_t current_time;
-	time(&current_time);
-	localtime_r(&current_time, dst);
-}
-
-static void time_manager_format_date(char *dst, time_info_t *timeinfo, char *formatter, int dst_length) {
-	strftime(dst, dst_length, formatter, timeinfo);
 }
 
 void time_manager_init() {
@@ -81,17 +62,10 @@ bool time_mnager_is_time_synched() {
 	return timeinfo.tm_year > 2000;
 }
 
-void time_manager_format_current_date(char *dst) {
-
-	time_info_t timeinfo;
-	time_manager_get_current_date_time(&timeinfo);
-	time_manager_format_date(dst, &timeinfo, LITERAL_DATE_FORMATTER, 11);
-}
-
-void time_manager_format_current_time(char *dst) {
+void time_manager_get_current_date_time(time_info_t *dst) {
 	
-	time_info_t timeinfo;
-	time_manager_get_current_date_time(&timeinfo);
-	time_manager_format_date(dst, &timeinfo, TIME_FORMATTER, 9);
+	time_t current_time;
+	time(&current_time);
+	localtime_r(&current_time, dst);
 }
 

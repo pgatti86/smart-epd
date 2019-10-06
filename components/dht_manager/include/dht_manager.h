@@ -16,10 +16,7 @@
 void 	dht_manager_setDhtGpio(int gpio);
 void 	dht_manager_startReading();
 void 	dht_manager_stopReading();
-void 	errorHandler(int response);
-int 	readDHT();
-float 	getHumidity();
-float 	getTemperature();
-int 	getSignalLevel( int usTimeOut, bool state );
+float 	dht_manager_getHumidity();
+float 	dht_manager_getTemperature();
 
 #endif

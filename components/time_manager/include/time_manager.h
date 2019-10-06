@@ -10,8 +10,7 @@
 
 #include "esp_sntp.h"
 #include <stdbool.h>
-
-typedef struct tm time_info_t;
+#include "time_info.h"
 
 void time_manager_init();
 
@@ -22,6 +21,8 @@ bool time_mnager_is_time_synched();
 void time_manager_format_current_date(char *dst);
 
 void time_manager_format_current_time(char *dst);
+
+void time_manager_get_current_date_time(time_info_t *dst);
 
 #endif /* COMPONENTS_TIME_MANAGER_INCLUDE_TIME_MANAGER_H_ */
 

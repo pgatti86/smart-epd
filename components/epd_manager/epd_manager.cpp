@@ -9,6 +9,7 @@
 #include "epdpaint.h"
 #include "esp_log.h"
 #include "epd_images.h"
+#include "time_formatter.h"
 
 #include "epd_manager.h"
 
@@ -54,19 +55,25 @@ static void epd_manager_draw_grid() {
   epd_manager_draw_paint(0, 0);
 }
 
-static void epd_manager_draw_time(char *time) {
+static void epd_manager_draw_time(time_info_t *dst) {
 
+  char time_buffer [20];
+  time_formatter_format_current_time(dst, time_buffer);
+    
   epd_manager_set_paint(SCREEN_WIDTH, 40, UNCOLORED);
-  paint.DrawStringAt(0, 0, time, &Font40, COLORED);
+  paint.DrawStringAt(0, 0, time_buffer, &Font24, COLORED);
   epd_manager_draw_paint(0, SCREEN_HEIGHT / 2);
 }
 
-static void epd_manager_draw_date(char *date) {
+static void epd_manager_draw_date(time_info_t *dst) {
   
+  char date_buffer [20];
+  time_formatter_format_current_date(dst, date_buffer);
+
   int paint_width = 120;
   int paint_height = 24;
   epd_manager_set_paint(paint_width, paint_height, UNCOLORED);
-  paint.DrawStringAt(0, 8, date, &Font16, COLORED);
+  paint.DrawStringAt(0, 8, date_buffer, &Font16, COLORED);
   epd_manager_draw_paint(SCREEN_WIDTH - paint_width, 0);
 }
 
@@ -84,11 +91,11 @@ void epd_manager_init() {
   paint.SetRotate(ROTATE_90);
 }
 
-void epd_manager_update(char *time, char *date) {
+void epd_manager_update(time_info_t *dst, float temperature, float humidity) {
 
-  epd_manager_draw_grid();
-  epd_manager_draw_date(date);
-  epd_manager_draw_time(time);
+  //epd_manager_draw_grid();
+  //epd_manager_draw_date(date);
+  epd_manager_draw_time(dst);
   
   epd.DisplayFrame();
 }
