@@ -15,10 +15,8 @@
 
 static const char *TAG = "EPD MANAGER";
 
-static const int TOP_LINE_HEIGHT = 30;
 static const int SCREEN_WIDTH = EPD_HEIGHT;
 static const int SCREEN_HEIGHT = EPD_WIDTH;
-static const int MAX_LIGHT_REFRESH_CYCLE = 100;
 
 static int display_refresh_count = 0;
 
@@ -58,16 +56,16 @@ static void epd_manager_draw_paint(int x, int y) {
 }
 
 static void epd_manager_draw_grid() {
-
+  int top_line_height = 20;
   epd_manager_set_paint(SCREEN_WIDTH, SCREEN_HEIGHT, UNCOLORED);
-  paint.DrawHorizontalLine(0, TOP_LINE_HEIGHT, SCREEN_WIDTH, COLORED);
-  paint.DrawVerticalLine(SCREEN_WIDTH - 132, 0, TOP_LINE_HEIGHT, COLORED);
+  paint.DrawHorizontalLine(0, top_line_height, SCREEN_WIDTH, COLORED);
+  paint.DrawVerticalLine(SCREEN_WIDTH - 132, 0, top_line_height, COLORED);
   epd_manager_draw_paint(0, 0);
 }
 
 static void epd_manager_draw_status_bar(bool is_connected) {
   const unsigned char *icon = is_connected ? WIFI_IMAGE_DATA : NO_WIFI_IMAGE_DATA;
-  epd.SetFrameMemory(icon, SCREEN_HEIGHT - 20, 8, 16, 16);
+  epd.SetFrameMemory(icon, SCREEN_HEIGHT - 16, 8, 16, 16);
 }
 
 static void epd_manager_draw_time(time_info_t *dst) {
@@ -77,7 +75,7 @@ static void epd_manager_draw_time(time_info_t *dst) {
     
   epd_manager_set_paint(SCREEN_WIDTH, 40, UNCOLORED);
   paint.DrawStringAt(0, 0, time_buffer, &Font40, COLORED);
-  epd_manager_draw_paint(0, 45);
+  epd_manager_draw_paint(0, 32);
 }
 
 static void epd_manager_draw_date(time_info_t *dst) {
@@ -86,9 +84,9 @@ static void epd_manager_draw_date(time_info_t *dst) {
   time_formatter_format_current_date(dst, date_buffer);
 
   int paint_width = 120;
-  int paint_height = 24;
+  int paint_height = 16;
   epd_manager_set_paint(paint_width, paint_height, UNCOLORED);
-  paint.DrawStringAt(0, 8, date_buffer, &Font16, COLORED);
+  paint.DrawStringAt(0, 4, date_buffer, &Font16, COLORED);
   epd_manager_draw_paint(SCREEN_WIDTH - paint_width, 0);
 }
 
@@ -137,6 +135,6 @@ void epd_manager_update(time_info_t *dst, float temperature, float humidity, boo
 
   epd.DisplayFrame();
 
-  display_refresh_count = display_refresh_count == MAX_LIGHT_REFRESH_CYCLE ? 
+  display_refresh_count = display_refresh_count == CONFIG_MAX_REWRITE_COUNT ? 
       0 : display_refresh_count + 1;
 }
