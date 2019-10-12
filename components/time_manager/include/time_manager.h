@@ -16,7 +16,7 @@ void time_manager_init();
 
 void time_manager_sync_time(bool async);
 
-bool time_mnager_is_time_synched();
+bool time_manager_is_time_synched();
 
 void time_manager_format_current_date(char *dst);
 

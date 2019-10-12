@@ -19,14 +19,14 @@ static const char *TAG = "time_manager";
 static void sync_time_with_ntp() {
 	
 	int retry = 0;
-	const int retry_count = MAX_RETRY_COUNT;
-	while (sntp_get_sync_status() == SNTP_SYNC_STATUS_RESET && ++retry < retry_count) {
+	
+	while (!time_manager_is_time_synched() && retry < MAX_RETRY_COUNT) {
 
 		if (!wifi_manager_is_sta_connected()) {
 			return;
 		}
-
-		ESP_LOGI(TAG, "Waiting for system time to be set... (%d/%d)", retry, retry_count);
+		retry++;
+		ESP_LOGI(TAG, "Waiting for system time to be set... (%d/%d)", retry, MAX_RETRY_COUNT);
 		vTaskDelay(2000 / portTICK_PERIOD_MS);
 	}
 }
@@ -55,11 +55,11 @@ void time_manager_sync_time(bool async) {
 	sync_time_with_ntp();
 }
 
-bool time_mnager_is_time_synched() {
+bool time_manager_is_time_synched() {
 	
 	time_info_t timeinfo;
 	time_manager_get_current_date_time(&timeinfo);
-	return timeinfo.tm_year > 2000;
+	return timeinfo.tm_year > (2000 - 1970);
 }
 
 void time_manager_get_current_date_time(time_info_t *dst) {
