@@ -16,7 +16,7 @@ extern "C" {
 #endif
 	void epd_manager_init();
 
-	void epd_manager_update(time_info_t *dst, float temperature, float humidity);
+	void epd_manager_update(time_info_t *dst, float temperature, float humidity, bool is_connected);
 
 #ifdef __cplusplus
 }

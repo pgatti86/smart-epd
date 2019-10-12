@@ -47,7 +47,8 @@ void app_task(void *pvParameter) {
     float t = dht_manager_getTemperature();
     float h = dht_manager_getHumidity();  
 
-    epd_manager_update(&dst, t, h);
+    bool is_connected = wifi_manager_is_sta_connected();
+    epd_manager_update(&dst, t, h, is_connected);
 
     vTaskDelay(1000 / portTICK_RATE_MS);
   }
@@ -63,6 +64,6 @@ void app_main() {
 
   ESP_ERROR_CHECK(nvs_flash_init());
 
-  xTaskCreate(&app_task, "app_task", 2048, NULL, 5, NULL);
+  xTaskCreate(&app_task, "app_task", 4096, NULL, 5, NULL);
 }
 

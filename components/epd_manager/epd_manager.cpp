@@ -18,6 +18,9 @@ static const char *TAG = "EPD MANAGER";
 static const int TOP_LINE_HEIGHT = 30;
 static const int SCREEN_WIDTH = EPD_HEIGHT;
 static const int SCREEN_HEIGHT = EPD_WIDTH;
+static const int MAX_LIGHT_REFRESH_CYCLE = 100;
+
+static int display_refresh_count = 0;
 
 unsigned char image[EPD_WIDTH*EPD_HEIGHT/8];
 Paint paint(image, 0, 0);    // width should be the multiple of 8
@@ -31,6 +34,13 @@ static void epd_manager_clear() {
 
   epd.ClearFrameMemory(0xFF);   // bit set = white, bit reset = black
   epd.DisplayFrame();
+}
+
+static void epd_manager_full_clear() {
+  
+  epd.Init(lut_full_update);
+  epd_manager_clear(); 
+  epd.Init(lut_partial_update);
 }
 
 static void epd_manager_set_paint(int width, int height, int clear_color) {
@@ -55,6 +65,11 @@ static void epd_manager_draw_grid() {
   epd_manager_draw_paint(0, 0);
 }
 
+static void epd_manager_draw_status_bar(bool is_connected) {
+  const unsigned char *icon = is_connected ? WIFI_IMAGE_DATA : NO_WIFI_IMAGE_DATA;
+  epd.SetFrameMemory(icon, SCREEN_HEIGHT - 20, 8, 16, 16);
+}
+
 static void epd_manager_draw_time(time_info_t *dst) {
 
   char time_buffer [20];
@@ -62,7 +77,7 @@ static void epd_manager_draw_time(time_info_t *dst) {
     
   epd_manager_set_paint(SCREEN_WIDTH, 40, UNCOLORED);
   paint.DrawStringAt(0, 0, time_buffer, &Font40, COLORED);
-  epd_manager_draw_paint(0, SCREEN_HEIGHT / 2);
+  epd_manager_draw_paint(0, 45);
 }
 
 static void epd_manager_draw_date(time_info_t *dst) {
@@ -78,15 +93,20 @@ static void epd_manager_draw_date(time_info_t *dst) {
 }
 
 static void epd_manager_draw_dht_data(float t, float h) {
-  
-  char temp_buffer [20];
-  sprintf(temp_buffer, "T:%.1fC H:%.1f%%", t, h); 
 
-  int paint_width = 150;
-  int paint_height = 24;
-  epd_manager_set_paint(paint_width, paint_height, UNCOLORED);
-  paint.DrawStringAt(5, 8, temp_buffer, &Font16, COLORED);
-  epd_manager_draw_paint(0, 0);
+  char temp_buffer [5];
+  epd.SetFrameMemory(TEMP_IMAGE_DATA, 8, 10, 24, 24);
+  sprintf(temp_buffer, "%.1fC", t); 
+  epd_manager_set_paint(64, 24, UNCOLORED);
+  paint.DrawStringAt(0, 0, temp_buffer, &Font16, COLORED);
+  epd_manager_draw_paint(40, SCREEN_HEIGHT - paint.GetWidth());
+
+  char hum_buffer [5];
+  epd.SetFrameMemory(DROP_IMAGE_DATA, 8, 120, 24, 24);
+  sprintf(hum_buffer, "%.1f%%", h); 
+  epd_manager_set_paint(64, 24, UNCOLORED);
+  paint.DrawStringAt(0, 0, hum_buffer, &Font16, COLORED);
+  epd_manager_draw_paint(152, SCREEN_HEIGHT - paint.GetWidth());
 }
 
 void epd_manager_init() {
@@ -103,12 +123,20 @@ void epd_manager_init() {
   paint.SetRotate(ROTATE_90);
 }
 
-void epd_manager_update(time_info_t *dst, float temperature, float humidity) {
+void epd_manager_update(time_info_t *dst, float temperature, float humidity, bool is_connected) {
+
+  if (display_refresh_count == 0) {
+    epd_manager_full_clear();
+  }
 
   epd_manager_draw_grid();
-  epd_manager_draw_dht_data(temperature, humidity);
+  epd_manager_draw_status_bar(is_connected);
   epd_manager_draw_date(dst);
   epd_manager_draw_time(dst);
-  
+  epd_manager_draw_dht_data(temperature, humidity);
+
   epd.DisplayFrame();
+
+  display_refresh_count = display_refresh_count == MAX_LIGHT_REFRESH_CYCLE ? 
+      0 : display_refresh_count + 1;
 }
