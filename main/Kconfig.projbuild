@@ -20,6 +20,11 @@ config DHT_GPIO
     int "DHT GPIO"
     default 4
 
+config BUTTON_GPIO
+    int "BUTTON GPIO"
+    range 0 34
+    default 0    
+
 config MAX_REWRITE_COUNT
     int "Run a full screen clean after the specified number"
     default 3600    

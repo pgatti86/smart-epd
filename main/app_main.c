@@ -8,6 +8,7 @@
 #include "time_manager.h"
 #include "epd_manager.h"
 #include "dht_manager.h"
+#include "gpio_manager.h"
 
 static const char *TAG = "MAIN";
 
@@ -24,6 +25,9 @@ static void wifi_manager_callback(int event_id) {
 }
 
 void app_task(void *pvParameter) {
+
+  ESP_LOGI(TAG, "init gpio_manager");
+  gpio_manger_init();
 
   ESP_LOGI(TAG, "init epd_manager");
   epd_manager_init();
