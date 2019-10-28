@@ -2,10 +2,13 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
+#include "gpio_manager.h"
 
 #define ESP_INTR_FLAG_DEFAULT 0
 #define DEBOUNCE_TIME 300
 #define LONG_CLICK_THRESHOLD 3000
+
+ESP_EVENT_DEFINE_BASE(GPIO_EVENTS);
 
 static xQueueHandle gpio_evt_queue = NULL;
 
@@ -35,9 +38,9 @@ static void gpio_isr_task() {
                 }
 
                 if(getTimeSinceStart() - current >= LONG_CLICK_THRESHOLD) {
-                    printf("long click\n\r");
+                    esp_event_post(GPIO_EVENTS, GPIO_RESET_EVENT, NULL, 0, portMAX_DELAY);
                 } else {
-                    printf("short click\n\r");
+                    esp_event_post(GPIO_EVENTS, GPIO_CLICK_EVENT, NULL, 0, portMAX_DELAY);
                 }   
 
                 last_btn_pressed_time = getTimeSinceStart();

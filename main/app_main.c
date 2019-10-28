@@ -12,6 +12,14 @@
 
 static const char *TAG = "MAIN";
 
+void gpio_event_handler(void* handler_arg, esp_event_base_t base, int32_t id, void* event_data) {
+    if(id == GPIO_CLICK_EVENT) {
+      printf("this is a click\n\r");
+    } else {
+      printf("this is a reset\n\r");
+    }
+}
+
 static void wifi_manager_callback(int event_id) {
   switch(event_id) {
   	  case SYSTEM_EVENT_STA_GOT_IP:
@@ -25,6 +33,9 @@ static void wifi_manager_callback(int event_id) {
 }
 
 void app_task(void *pvParameter) {
+
+  esp_event_loop_create_default();
+  esp_event_handler_register(GPIO_EVENTS, ESP_EVENT_ANY_ID, gpio_event_handler, NULL);
 
   ESP_LOGI(TAG, "init gpio_manager");
   gpio_manger_init();
