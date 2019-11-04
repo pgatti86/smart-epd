@@ -3,7 +3,7 @@
 
 static char const *ISO8601_FORMATTER = "%Y-%m-%dT%H:%M:%SZ";
 
-static char const *TIME_FORMATTER = "%R";
+static char const *TIME_FORMATTER = "%R"; // "%R" whithout seconds, %X with seconds
 
 static char const *DATE_FORMATTER = "%d/%m/%Y";
 

@@ -54,15 +54,17 @@ void app_task(void *pvParameter) {
   ESP_LOGI(TAG, "init time_manager");
   time_manager_init();
 
-  time_info_t dst;
+  time_info_t dst;    
+  
   while(1) {
-    
+
     time_manager_get_current_date_time(&dst);
 
     float t = dht_manager_getTemperature();
     float h = dht_manager_getHumidity();  
 
     bool is_connected = wifi_manager_is_sta_connected();
+    
     epd_manager_update(&dst, t, h, is_connected);
     
     vTaskDelay(1000 / portTICK_RATE_MS);

@@ -10,6 +10,7 @@
 #include "esp_log.h"
 #include "epd_images.h"
 #include "time_formatter.h"
+#include "clock_data.h"
 
 #include "epd_manager.h"
 
@@ -19,6 +20,8 @@ static const int SCREEN_WIDTH = EPD_HEIGHT;
 static const int SCREEN_HEIGHT = EPD_WIDTH;
 
 static int display_refresh_count = 0;
+
+static ClockData clockData;
 
 unsigned char image[EPD_WIDTH*EPD_HEIGHT/8];
 Paint paint(image, 0, 0);    // width should be the multiple of 8
@@ -57,7 +60,7 @@ static void epd_manager_draw_paint(int x, int y) {
 
 static void epd_manager_draw_grid() {
   int top_line_height = 20;
-  epd_manager_set_paint(SCREEN_WIDTH, SCREEN_HEIGHT, UNCOLORED);
+  epd_manager_set_paint(SCREEN_WIDTH, top_line_height, UNCOLORED);
   paint.DrawHorizontalLine(0, top_line_height, SCREEN_WIDTH, COLORED);
   paint.DrawVerticalLine(SCREEN_WIDTH - 132, 0, top_line_height, COLORED);
   epd_manager_draw_paint(0, 0);
@@ -127,14 +130,40 @@ void epd_manager_update(time_info_t *dst, float temperature, float humidity, boo
     epd_manager_full_clear();
   }
 
-  epd_manager_draw_grid();
-  epd_manager_draw_status_bar(is_connected);
-  epd_manager_draw_date(dst);
-  epd_manager_draw_time(dst);
-  epd_manager_draw_dht_data(temperature, humidity);
+  bool force_update = display_refresh_count < 3;
+  bool need_update = clockData.has_data_changed(dst, temperature, humidity, is_connected);
 
-  epd.DisplayFrame();
+  if (force_update) {
+    epd_manager_draw_grid();
+    ESP_LOGI(TAG, "Drawing grid");
+  }
 
-  display_refresh_count = display_refresh_count == CONFIG_MAX_REWRITE_COUNT ? 
-      0 : display_refresh_count + 1;
+  if (force_update || (need_update && clockData.has_status_bar_changed(is_connected))) {
+    ESP_LOGI(TAG, "Drawing status bar");
+    epd_manager_draw_status_bar(is_connected);
+  }
+  
+  if (force_update || (need_update && clockData.has_time_changed(dst))) {
+    ESP_LOGI(TAG, "Drawing time");
+    epd_manager_draw_time(dst); 
+  }
+
+  if (force_update || (need_update && clockData.has_date_changed(dst))) {
+    ESP_LOGI(TAG, "Drawing date");
+    epd_manager_draw_date(dst);
+  }
+
+  if (force_update || (need_update && clockData.has_dht_data_changed(temperature, humidity))) {
+    ESP_LOGI(TAG, "Drawing dht");
+    epd_manager_draw_dht_data(temperature, humidity);
+  }
+
+  if (force_update || need_update) {
+    epd.DisplayFrame();
+
+    display_refresh_count = display_refresh_count == CONFIG_MAX_REWRITE_COUNT ? 
+      0 : display_refresh_count + 1;   
+
+    clockData.update_data(dst, temperature, humidity, is_connected);   
+  }
 }
