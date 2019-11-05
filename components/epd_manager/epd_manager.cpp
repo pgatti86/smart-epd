@@ -76,9 +76,19 @@ static void epd_manager_draw_time(time_info_t *dst) {
   char time_buffer [20];
   time_formatter_format_current_time(dst, time_buffer);
     
-  epd_manager_set_paint(SCREEN_WIDTH, 40, UNCOLORED);
+  epd_manager_set_paint(175, 40, UNCOLORED);
   paint.DrawStringAt(0, 0, time_buffer, &Font40, COLORED);
   epd_manager_draw_paint(0, 32);
+}
+
+static void epd_manager_draw_seconds(time_info_t *dst) {
+
+  char seconds_buffer [3];
+  time_formatter_format_current_seconds(dst, seconds_buffer);
+    
+  epd_manager_set_paint(32, 11, UNCOLORED);
+  paint.DrawStringAt(0, 0, seconds_buffer, &Font16, COLORED);
+  epd_manager_draw_paint(185, 32);
 }
 
 static void epd_manager_draw_date(time_info_t *dst) {
@@ -96,18 +106,21 @@ static void epd_manager_draw_date(time_info_t *dst) {
 static void epd_manager_draw_dht_data(float t, float h) {
 
   char temp_buffer [5];
-  epd.SetFrameMemory(TEMP_IMAGE_DATA, 8, 10, 24, 24);
   sprintf(temp_buffer, "%.1fC", t); 
   epd_manager_set_paint(64, 24, UNCOLORED);
   paint.DrawStringAt(0, 0, temp_buffer, &Font16, COLORED);
   epd_manager_draw_paint(40, SCREEN_HEIGHT - paint.GetWidth());
 
   char hum_buffer [5];
-  epd.SetFrameMemory(DROP_IMAGE_DATA, 8, 120, 24, 24);
   sprintf(hum_buffer, "%.1f%%", h); 
   epd_manager_set_paint(64, 24, UNCOLORED);
   paint.DrawStringAt(0, 0, hum_buffer, &Font16, COLORED);
   epd_manager_draw_paint(152, SCREEN_HEIGHT - paint.GetWidth());
+}
+
+static void epd_manager_draw_static_images() {
+  epd.SetFrameMemory(TEMP_IMAGE_DATA, 8, 10, 24, 24);
+  epd.SetFrameMemory(DROP_IMAGE_DATA, 8, 120, 24, 24);
 }
 
 void epd_manager_init() {
@@ -135,22 +148,28 @@ void epd_manager_update(time_info_t *dst, float temperature, float humidity, boo
 
   if (force_update) {
     epd_manager_draw_grid();
-    ESP_LOGI(TAG, "Drawing grid");
+    epd_manager_draw_static_images();
+    ESP_LOGI(TAG, "Drawing grid and static images");
   }
 
   if (force_update || (need_update && clockData.has_status_bar_changed(is_connected))) {
     ESP_LOGI(TAG, "Drawing status bar");
     epd_manager_draw_status_bar(is_connected);
   }
-  
+
+  if (force_update || (need_update && clockData.has_date_changed(dst))) {
+    ESP_LOGI(TAG, "Drawing date");
+    epd_manager_draw_date(dst);
+  }
+
   if (force_update || (need_update && clockData.has_time_changed(dst))) {
     ESP_LOGI(TAG, "Drawing time");
     epd_manager_draw_time(dst); 
   }
 
-  if (force_update || (need_update && clockData.has_date_changed(dst))) {
-    ESP_LOGI(TAG, "Drawing date");
-    epd_manager_draw_date(dst);
+  if (force_update || (need_update && clockData.has_seconds_changed(dst))) {
+    ESP_LOGI(TAG, "Drawing seconds");
+    epd_manager_draw_seconds(dst);
   }
 
   if (force_update || (need_update && clockData.has_dht_data_changed(temperature, humidity))) {

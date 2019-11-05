@@ -3,6 +3,8 @@
 
 static char const *ISO8601_FORMATTER = "%Y-%m-%dT%H:%M:%SZ";
 
+static char const *SECONDS_FORMATTER = "%S";
+
 static char const *TIME_FORMATTER = "%R"; // "%R" whithout seconds, %X with seconds
 
 static char const *DATE_FORMATTER = "%d/%m/%Y";
@@ -22,4 +24,9 @@ void time_formatter_format_current_date(time_info_t *timeinfo, char *dst) {
 void time_formatter_format_current_time(time_info_t *timeinfo, char *dst) {
 	
 	time_formatter_format_date(dst, timeinfo, TIME_FORMATTER, 9);
+}
+
+void time_formatter_format_current_seconds(time_info_t *timeinfo, char *dst) {
+	
+	time_formatter_format_date(dst, timeinfo, SECONDS_FORMATTER, 3);
 }

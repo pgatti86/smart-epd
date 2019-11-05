@@ -7,19 +7,21 @@
 class ClockData {
     
     private:
+        int seconds_update_count = 0;
+        int seconds = -1;
 
         int time_update_count = 0;    
-        int minutes = 0;
+        int minutes = -1;
         
         int date_update_count = 0;
-        int day = 0;
+        int day = -1;
         
         int connection_status_update_count = 0;
         bool is_connected = false;
         
         int dht_data_update_count = 0;
-        float temperature = 0;
-        float humidity = 0;
+        float temperature = -100;
+        float humidity = -100;
 
     public:
         ClockData(void) {}
@@ -27,11 +29,23 @@ class ClockData {
     
         bool has_data_changed(time_info_t *time, float temperature, float humidity, bool is_connected) {
             
-            return this->minutes != time->tm_min ||
+            return this->seconds != time->tm_sec || 
+                this->minutes != time->tm_min ||
                 this->day != time->tm_yday ||
                 this->is_connected != is_connected ||
                 this->temperature != temperature ||
                 this->humidity != humidity;
+        }
+
+        bool has_seconds_changed(time_info_t *t) {
+
+            bool has_seconds_changed = t->tm_sec != seconds;
+            if (has_seconds_changed || seconds_update_count %2 != 0) {
+                seconds_update_count +=1;
+                return true;
+            }
+
+            return false;
         }
 
         bool has_time_changed(time_info_t *t) {
@@ -80,6 +94,7 @@ class ClockData {
 
         void update_data(time_info_t *time, float temperature, float humidity, bool is_connected) {
             
+            this->seconds = time->tm_sec;
             this->minutes = time->tm_min;
             this->day = time->tm_yday;
             this->is_connected = is_connected;
