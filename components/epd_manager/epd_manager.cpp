@@ -133,7 +133,8 @@ void epd_manager_init() {
   ESP_LOGI(TAG, "e-Paper initialized");
 
   epd_manager_clear();
-  paint.Clear(UNCOLORED);
+  paint.SetWidth(EPD_WIDTH);
+  paint.SetHeight(EPD_HEIGHT);
   paint.SetRotate(ROTATE_90);
 }
 
@@ -143,7 +144,7 @@ void epd_manager_update(time_info_t *dst, float temperature, float humidity, boo
     epd_manager_full_clear();
   }
 
-  bool force_update = display_refresh_count < 3;
+  bool force_update = display_refresh_count < 2;
   bool need_update = clockData.has_data_changed(dst, temperature, humidity, is_connected);
 
   if (force_update) {
