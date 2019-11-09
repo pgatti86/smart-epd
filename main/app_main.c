@@ -98,6 +98,7 @@ void app_main() {
   if (!storage_manager_has_enrollment_done()) {
     ESP_LOGI(TAG, "init enrollment_manager");
     enrollment_manager_start(enrollment_manager_callback);
+    epd_manager_show_enrollment("ssidHere", "pwdHere", 123456);
   } else {
     ESP_LOGI(TAG, "init wifi_manager");
     wifi_manager_sta_init();
