@@ -10,6 +10,7 @@
 #include "epd_manager.h"
 #include "dht_manager.h"
 #include "gpio_manager.h"
+#include "storage_manager.h"
 
 static const char *TAG = "MAIN";
 
@@ -111,7 +112,7 @@ void app_main()
 
   esp_log_level_set("*", ESP_LOG_INFO);
 
-  ESP_ERROR_CHECK(nvs_flash_init());
+  storage_manager_init();
 
   xTaskCreate(&app_task, "app_task", 4096, NULL, 5, NULL);
 }
