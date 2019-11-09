@@ -44,11 +44,12 @@ static void enrollment_manager_callback(int event_id)
 {
   switch (event_id)
   {
-  case SYSTEM_EVENT_AP_STACONNECTED:
-	ESP_LOGI(TAG, "SYSTEM_EVENT_AP_STACONNECTED...");
-    //TODO: Change value here
+  case SYSTEM_EVENT_STA_GOT_IP:
+	ESP_LOGI(TAG, "SYSTEM_EVENT_STA_GOT_IP...");
+    storage_manager_set_enrollment_status(ENROLLMENT_COMPLETED);
     esp_restart();
     break;
+  case SYSTEM_EVENT_AP_STACONNECTED:
   case SYSTEM_EVENT_AP_START:
   case SYSTEM_EVENT_AP_STADISCONNECTED:
     //TODO handle event
@@ -71,7 +72,7 @@ void app_task(void *pvParameter)
   ESP_LOGI(TAG, "init dht_manager");
   dht_manager_startReading();
 
-  if (true) {
+  if (!storage_manager_has_enrollment_done()) {
     ESP_LOGI(TAG, "init enrollment_manager");
     enrollment_manager_start(enrollment_manager_callback);
   }
