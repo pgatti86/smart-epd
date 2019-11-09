@@ -150,31 +150,31 @@ void epd_manager_update(time_info_t *dst, float temperature, float humidity, boo
   if (force_update) {
     epd_manager_draw_grid();
     epd_manager_draw_static_images();
-    ESP_LOGI(TAG, "Drawing grid and static images");
+    ESP_LOGD(TAG, "Drawing grid and static images");
   }
 
   if (force_update || (need_update && clockData.has_status_bar_changed(is_connected))) {
-    ESP_LOGI(TAG, "Drawing status bar");
+    ESP_LOGD(TAG, "Drawing status bar");
     epd_manager_draw_status_bar(is_connected);
   }
 
   if (force_update || (need_update && clockData.has_date_changed(dst))) {
-    ESP_LOGI(TAG, "Drawing date");
+    ESP_LOGD(TAG, "Drawing date");
     epd_manager_draw_date(dst);
   }
 
   if (force_update || (need_update && clockData.has_time_changed(dst))) {
-    ESP_LOGI(TAG, "Drawing time");
+    ESP_LOGD(TAG, "Drawing time");
     epd_manager_draw_time(dst); 
   }
 
   if (force_update || (need_update && clockData.has_seconds_changed(dst))) {
-    ESP_LOGI(TAG, "Drawing seconds");
+    ESP_LOGD(TAG, "Drawing seconds");
     epd_manager_draw_seconds(dst);
   }
 
   if (force_update || (need_update && clockData.has_dht_data_changed(temperature, humidity))) {
-    ESP_LOGI(TAG, "Drawing dht");
+    ESP_LOGD(TAG, "Drawing dht");
     epd_manager_draw_dht_data(temperature, humidity);
   }
 

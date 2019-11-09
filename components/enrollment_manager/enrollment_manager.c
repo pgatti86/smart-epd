@@ -14,6 +14,9 @@
 
 static const char *TAG = "enrollment_manager";
 
+#define SSID "PIPPO"
+#define PWD "PLUTO1234567"
+
 static wifi_event_callback_t event_callback;
 
 static esp_err_t event_handler(void *ctx, system_event_t *event) {
@@ -38,8 +41,9 @@ void enrollment_manager_start(wifi_event_callback_t wifi_callback) {
 
     wifi_config_t wifi_config = {
         .ap = {
-            .ssid = "PIPPO",
-            .password = "PLUTO",
+            .ssid = SSID,
+            .ssid_len = strlen(SSID),
+            .password = PWD,
             .max_connection = 1,
             .authmode = WIFI_AUTH_WPA_WPA2_PSK
         },
