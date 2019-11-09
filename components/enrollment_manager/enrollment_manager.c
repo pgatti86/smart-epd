@@ -14,7 +14,7 @@
 
 static const char *TAG = "enrollment_manager";
 
-#define SSID "PIPPO"
+#define SSID "PLUTO1234567"
 #define PWD "PLUTO1234567"
 
 static wifi_event_callback_t event_callback;
@@ -59,7 +59,7 @@ void enrollment_manager_start(wifi_event_callback_t wifi_callback) {
     };
 
     esp_wifi_set_mode(WIFI_MODE_AP);
-    esp_wifi_set_config(WIFI_MODE_AP, &wifi_config);
+    esp_wifi_set_config(ESP_IF_WIFI_AP, &wifi_config);
     esp_wifi_start();
 
 	ESP_LOGI(TAG, "configuring enrollment manager end...");
