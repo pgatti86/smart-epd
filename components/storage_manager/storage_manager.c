@@ -79,3 +79,7 @@ void storage_manager_close_nvs() {
         nvs_close(nvs_memory_handle);
     }
 }
+
+void storage_manager_format_nvs() {
+    nvs_flash_erase();
+}

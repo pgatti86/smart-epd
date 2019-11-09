@@ -21,4 +21,8 @@ void storage_manager_set_enrollment_status(int status);
 
 void storage_manager_close_nvs();
 
+void storage_manager_close_nvs();
+
+void storage_manager_format_nvs();
+
 #endif /* COMPONENTS_TIME_MANAGER_INCLUDE_TIME_MANAGER_H_ */

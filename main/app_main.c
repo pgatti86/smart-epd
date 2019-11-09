@@ -14,22 +14,18 @@
 
 static const char *TAG = "MAIN";
 
-void gpio_event_handler(void *handler_arg, esp_event_base_t base, int32_t id, void *event_data)
-{
-  if (id == GPIO_CLICK_EVENT)
-  {
+void gpio_event_handler(void *handler_arg, esp_event_base_t base, int32_t id, void *event_data) {
+  
+  if (id == GPIO_CLICK_EVENT) {
     printf("this is a click\n\r");
-  }
-  else
-  {
-    printf("this is a reset\n\r");
+  } else {
+    ESP_LOGI(TAG, "Reset flash...");
+    storage_manager_format_nvs();
   }
 }
 
-static void wifi_manager_callback(int event_id)
-{
-  switch (event_id)
-  {
+static void wifi_manager_callback(int event_id) {
+  switch (event_id) {
   case SYSTEM_EVENT_STA_GOT_IP:
     time_manager_sync_time(true);
     break;
@@ -40,10 +36,8 @@ static void wifi_manager_callback(int event_id)
   }
 }
 
-static void enrollment_manager_callback(int event_id)
-{
-  switch (event_id)
-  {
+static void enrollment_manager_callback(int event_id) {
+  switch (event_id) {
   case SYSTEM_EVENT_STA_GOT_IP:
 	ESP_LOGI(TAG, "SYSTEM_EVENT_STA_GOT_IP...");
     storage_manager_set_enrollment_status(ENROLLMENT_COMPLETED);
@@ -57,39 +51,17 @@ static void enrollment_manager_callback(int event_id)
   }
 }
 
-void app_task(void *pvParameter)
-{
-
-  esp_event_loop_create_default();
-  esp_event_handler_register(GPIO_EVENTS, ESP_EVENT_ANY_ID, gpio_event_handler, NULL);
-
-  ESP_LOGI(TAG, "init gpio_manager");
-  gpio_manger_init();
-
-  ESP_LOGI(TAG, "init epd_manager");
-  epd_manager_init();
+void app_task(void *pvParameter) {
 
   ESP_LOGI(TAG, "init dht_manager");
   dht_manager_startReading();
-
-  if (!storage_manager_has_enrollment_done()) {
-    ESP_LOGI(TAG, "init enrollment_manager");
-    enrollment_manager_start(enrollment_manager_callback);
-  }
-  else {
-    ESP_LOGI(TAG, "init wifi_manager");
-    wifi_manager_sta_init();
-    wifi_manager_set_callback(wifi_manager_callback);
-    wifi_manager_connect(true);
-  }
 
   ESP_LOGI(TAG, "init time_manager");
   time_manager_init();
 
   time_info_t dst;
 
-  while (1)
-  {
+  while (1) {
 
     time_manager_get_current_date_time(&dst);
 
@@ -104,8 +76,7 @@ void app_task(void *pvParameter)
   }
 }
 
-void app_main()
-{
+void app_main() {
 
   ESP_LOGI(TAG, "[APP] Startup..");
   ESP_LOGI(TAG, "[APP] Free memory: %d bytes", esp_get_free_heap_size());
@@ -115,5 +86,23 @@ void app_main()
 
   storage_manager_init();
 
-  xTaskCreate(&app_task, "app_task", 4096, NULL, 5, NULL);
+  esp_event_loop_create_default();
+  esp_event_handler_register(GPIO_EVENTS, ESP_EVENT_ANY_ID, gpio_event_handler, NULL);
+
+  ESP_LOGI(TAG, "init gpio_manager");
+  gpio_manger_init();
+
+  ESP_LOGI(TAG, "init epd_manager");
+  epd_manager_init();
+
+  if (!storage_manager_has_enrollment_done()) {
+    ESP_LOGI(TAG, "init enrollment_manager");
+    enrollment_manager_start(enrollment_manager_callback);
+  } else {
+    ESP_LOGI(TAG, "init wifi_manager");
+    wifi_manager_sta_init();
+    wifi_manager_set_callback(wifi_manager_callback);
+    wifi_manager_connect(true);
+    xTaskCreate(&app_task, "app_task", 4096, NULL, 5, NULL);
+  }
 }
