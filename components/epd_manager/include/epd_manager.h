@@ -18,6 +18,8 @@ extern "C" {
 
 	void epd_manager_update(time_info_t *dst, float temperature, float humidity, bool is_connected);
 
+	void epd_manager_show_enrollment(char *ssid, char *pwd, int code);
+
 #ifdef __cplusplus
 }
 #endif
