@@ -196,15 +196,15 @@ void epd_manager_show_enrollment(char *ssid, char *pwd, int code) {
     
     char ssid_data[30];
     sprintf(ssid_data, "ssid: %s", ssid); 
-    paint.DrawStringAt(10, 30, ssid_data, &Font16, COLORED);
+    paint.DrawStringAt(10, 40, ssid_data, &Font16, COLORED);
     
     char pwd_data[30];
     sprintf(pwd_data, "pwd: %s", pwd);
-    paint.DrawStringAt(10, 50, pwd_data, &Font16, COLORED);
+    paint.DrawStringAt(10, 65, pwd_data, &Font16, COLORED);
 
     char pop_data[30];
     sprintf(pop_data, "code: %d", code);
-    paint.DrawStringAt(10, 70, pop_data, &Font16, COLORED);
+    paint.DrawStringAt(10, 90, pop_data, &Font16, COLORED);
 
     epd_manager_draw_paint(0, 0);
     epd.DisplayFrame();
