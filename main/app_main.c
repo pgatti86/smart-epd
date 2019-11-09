@@ -97,7 +97,6 @@ void app_main() {
 
   if (!storage_manager_has_enrollment_done()) {
     ESP_LOGI(TAG, "init enrollment_manager");
-    storage_manager_format_nvs();
     enrollment_manager_start(enrollment_manager_callback);
     epd_manager_show_enrollment("PIPPO", "PLUTO1234567", 123456);
   } else {
