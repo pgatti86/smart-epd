@@ -14,10 +14,28 @@ Project Makefile has the following configuration to include the submodule librar
 
 build sistem [reference](https://docs.espressif.com/projects/esp-idf/en/v3.3/api-guides/build-system.html)
 
-## Configure WiFi credentials
+## Configurations
 
-Before flashing the app configure your WiFi credentials using **make menuconfig** command.
-Look for "SMART-EPD config" menù for project settings.
+Before flashing the app you need to confifure the device with **make menuconfig** command:
+
+### Configure WiFi credentials
+
+Look for "SMART-EPD config" menù and enter your wifi credentials.
+This option will be removed when the enrollment feature will be completed.
+
+### Partition Tables
+
+The app uses a custom partition table defined in partitions.csv file:
+
+In "Partition table" menù select "Partition Table" sub-menù.
+Check the "custom partition table" option.
+
+You also need to change the embedded flash size:
+In "Serial flasher" menù enter "Flash size" sub-menù and select 4MB.
+
+Save and exit.
+Back in CLI run "make" command.
+You can check partition table with "make partition_table" command.
 
 ## How connect eink display
 

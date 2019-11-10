@@ -9,8 +9,7 @@
 #define COMPONENTS_WIFI_MANAGER_INCLUDE_WIFI_MANAGER_H_
 
 #include <stdbool.h>
-
-typedef void (*wifi_event_callback_t)(int event_id);
+#include "wifi_callback.h"
 
 void wifi_manager_sta_init();
 

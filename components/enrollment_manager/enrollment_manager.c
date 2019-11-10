@@ -6,15 +6,15 @@
  */
 #include "enrollment_manager.h"
 #include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
 #include "freertos/event_groups.h"
 #include "esp_event_loop.h"
 #include "esp_wifi.h"
 #include "esp_log.h"
+#include <string.h>
 
 static const char *TAG = "enrollment_manager";
 
-#define SSID "PLUTO1234567"
+#define SSID "PLUTO"
 #define PWD "PLUTO1234567"
 
 static wifi_event_callback_t event_callback;
