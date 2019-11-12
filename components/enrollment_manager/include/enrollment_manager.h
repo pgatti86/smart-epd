@@ -10,6 +10,6 @@
 
 #include "wifi_callback.h"
 
-void enrollment_manager_start(wifi_event_callback_t wifi_callback);
+void enrollment_manager_init(wifi_event_callback_t wifi_callback);
 
 #endif /* COMPONENTS_ENROLLMENT_MANAGER_INCLUDE_ENROLLMENT_MANAGER_H_ */

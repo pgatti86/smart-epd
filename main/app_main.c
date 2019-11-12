@@ -21,6 +21,7 @@ void gpio_event_handler(void *handler_arg, esp_event_base_t base, int32_t id, vo
   } else {
     ESP_LOGI(TAG, "Reset flash...");
     storage_manager_format_nvs();
+    esp_restart();
   }
 }
 
@@ -38,15 +39,10 @@ static void wifi_manager_callback(int event_id) {
 
 static void enrollment_manager_callback(int event_id) {
   switch (event_id) {
-  case SYSTEM_EVENT_STA_GOT_IP:
-	ESP_LOGI(TAG, "SYSTEM_EVENT_STA_GOT_IP...");
-    storage_manager_set_enrollment_status(ENROLLMENT_COMPLETED);
-    esp_restart();
-    break;
-  case SYSTEM_EVENT_AP_STACONNECTED:
-  case SYSTEM_EVENT_AP_START:
-  case SYSTEM_EVENT_AP_STADISCONNECTED:
-    //TODO handle event
+    case SYSTEM_EVENT_STA_GOT_IP:
+	    ESP_LOGI(TAG, "SYSTEM_EVENT_STA_GOT_IP...");
+      storage_manager_set_enrollment_status(ENROLLMENT_COMPLETED);
+      esp_restart();
     break;
   }
 }
@@ -97,8 +93,8 @@ void app_main() {
 
   if (!storage_manager_has_enrollment_done()) {
     ESP_LOGI(TAG, "init enrollment_manager");
-    enrollment_manager_start(enrollment_manager_callback);
-    epd_manager_show_enrollment("PIPPO", "PLUTO1234567", 123456);
+    enrollment_manager_init(enrollment_manager_callback);
+    epd_manager_show_enrollment("PLUTO", "PLUTO1234567", 12345);
   } else {
     ESP_LOGI(TAG, "init wifi_manager");
     wifi_manager_sta_init();
