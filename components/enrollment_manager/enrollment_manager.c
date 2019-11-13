@@ -18,9 +18,15 @@
 
 static const char *TAG = "enrollment_manager";
 
+#define MAX_WAIT_COUNT 40
+
 #define SSID "PLUTO"
 #define PWD "PLUTO1234567"
 #define CODE 12345
+
+enum ConnectionStatus {not_connected, connected}; 
+
+static enum ConnectionStatus conn_status;
 
 static wifi_event_callback_t event_callback;
 
@@ -28,22 +34,36 @@ static httpd_handle_t server = NULL;
 
 static void stop_webserver();
 
+static void reset_task(void *pvParameter) {
+
+    int i = 5;
+    while(i >= 0) {
+        ESP_LOGI(TAG, "Restarting in %d s", i);
+        i--;
+        vTaskDelay(1000 / portTICK_RATE_MS);
+    }
+
+    stop_webserver();
+    if (event_callback) {
+	    event_callback(SYSTEM_EVENT_STA_GOT_IP);
+	}
+
+    vTaskDelete(NULL);
+}
+
 static esp_err_t event_handler(void *ctx, system_event_t *event) {
 
     switch (event-> event_id) {
         case SYSTEM_EVENT_STA_GOT_IP:
-            stop_webserver();
+            conn_status = connected;
             break;
         case SYSTEM_EVENT_STA_DISCONNECTED:
+            conn_status = not_connected;
             break;    
         default:
             break;    
     }
 	
-    if (event_callback) {
-		event_callback(event-> event_id);
-	}
-
     return ESP_OK;
 }
 
@@ -57,8 +77,7 @@ static esp_err_t credentials_post_handler(httpd_req_t *req) {
         ret =  httpd_req_recv(req, buf, MIN(remaining, sizeof(buf)));
         if (ret <= 0) { /* 0 return value indicates connection closed */
             if (ret == HTTPD_SOCK_ERR_TIMEOUT) {
-                /* Retry receiving if timeout occurred */
-                continue;
+                httpd_resp_send_408(req);
             }
             return ESP_FAIL; // close the socket
         }
@@ -94,15 +113,24 @@ static esp_err_t credentials_post_handler(httpd_req_t *req) {
     strcpy((char *)wifi_config.sta.password,(char *)pwdJson->valuestring);
 
     esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config);
+    esp_wifi_connect();
     cJSON_Delete(root);
     
-    //httpd_resp_send_err(credentials_request, HTTPD_500_INTERNAL_SERVER_ERROR, NULL);
+    conn_status = not_connected;
+    int wait_count = 0;
+    while (conn_status == not_connected && wait_count < MAX_WAIT_COUNT) {
+        vTaskDelay(250 / portTICK_RATE_MS);
+        wait_count +=1;
+    }
 
-    esp_wifi_connect();
-
-    httpd_resp_send(req, NULL, 0);
+    if (conn_status == connected) {
+        httpd_resp_send(req, NULL, 0);
+        xTaskCreate(&reset_task, "reset_task", 2048, NULL, 5, NULL);
+        return ESP_OK;
+    }
     
-    return ESP_OK;
+    httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, NULL);
+    return ESP_FAIL;
 }
 
 static const httpd_uri_t set_credentials = {
@@ -128,7 +156,7 @@ static httpd_handle_t start_webserver() {
 
 static void stop_webserver() {
 
-    if(server != NULL) {
+    if (server != NULL) {
         httpd_stop(server);
         server = NULL;
     }

@@ -17,7 +17,7 @@ static const char *TAG = "MAIN";
 void gpio_event_handler(void *handler_arg, esp_event_base_t base, int32_t id, void *event_data) {
   
   if (id == GPIO_CLICK_EVENT) {
-    printf("this is a click\n\r");
+    ESP_LOGI(TAG, "This is a click");
   } else {
     ESP_LOGI(TAG, "Reset flash...");
     storage_manager_format_nvs();
@@ -48,6 +48,11 @@ static void enrollment_manager_callback(int event_id) {
 }
 
 void app_task(void *pvParameter) {
+
+  ESP_LOGI(TAG, "init wifi_manager");
+  wifi_manager_sta_init();
+  wifi_manager_set_callback(wifi_manager_callback);
+  wifi_manager_connect(true);
 
   ESP_LOGI(TAG, "init dht_manager");
   dht_manager_startReading();
@@ -92,14 +97,9 @@ void app_main() {
   epd_manager_init();
 
   if (!storage_manager_has_enrollment_done()) {
-    ESP_LOGI(TAG, "init enrollment_manager");
     enrollment_manager_init(enrollment_manager_callback);
     epd_manager_show_enrollment("PLUTO", "PLUTO1234567", 12345);
   } else {
-    ESP_LOGI(TAG, "init wifi_manager");
-    wifi_manager_sta_init();
-    wifi_manager_set_callback(wifi_manager_callback);
-    wifi_manager_connect(true);
     xTaskCreate(&app_task, "app_task", 4096, NULL, 5, NULL);
   }
 }
