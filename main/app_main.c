@@ -98,7 +98,11 @@ void app_main() {
 
   if (!storage_manager_has_enrollment_done()) {
     enrollment_manager_init(enrollment_manager_callback);
-    epd_manager_show_enrollment("PLUTO", "PLUTO1234567", 12345);
+
+    char *ssid =  enrollment_manager_get_ssid();
+    char *pwd = enrollment_manager_get_password();
+    int token = enrollment_manager_get_verification_code();
+    epd_manager_show_enrollment(ssid, pwd, token);
   } else {
     xTaskCreate(&app_task, "app_task", 4096, NULL, 5, NULL);
   }

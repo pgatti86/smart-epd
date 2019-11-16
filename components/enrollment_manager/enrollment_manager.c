@@ -15,16 +15,22 @@
 #include <sys/param.h>
 #include "cJSON.h"
 #include "strings.h"
+#include <stdlib.h>
+#include "utils.h"
 
 static const char *TAG = "enrollment_manager";
 
 #define MAX_WAIT_COUNT 40
+#define SSID_LENGTH 9
+#define PWD_LENGTH 9
 
-#define SSID "PLUTO"
-#define PWD "PLUTO1234567"
-#define CODE 12345
+static char ssid[SSID_LENGTH];
 
-enum ConnectionStatus {not_connected, connected}; 
+static char pwd[PWD_LENGTH];
+
+static int verification_token = 0;
+
+enum ConnectionStatus {unknown, not_connected, connected}; 
 
 static enum ConnectionStatus conn_status;
 
@@ -103,7 +109,7 @@ static esp_err_t credentials_post_handler(httpd_req_t *req) {
     
     if ((!cJSON_IsString(ssidJson) || (ssidJson->valuestring == NULL)) ||
         (!cJSON_IsString(pwdJson) || (pwdJson->valuestring == NULL)) ||
-        (!cJSON_IsNumber(codeJson)) || (codeJson->valueint != CODE)) {            
+        (!cJSON_IsNumber(codeJson)) || (codeJson->valueint != verification_token)) {            
         httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, NULL);
         return ESP_FAIL;
     }
@@ -116,9 +122,9 @@ static esp_err_t credentials_post_handler(httpd_req_t *req) {
     esp_wifi_connect();
     cJSON_Delete(root);
     
-    conn_status = not_connected;
+    conn_status = unknown;
     int wait_count = 0;
-    while (conn_status == not_connected && wait_count < MAX_WAIT_COUNT) {
+    while (conn_status == unknown && wait_count < MAX_WAIT_COUNT) {
         vTaskDelay(250 / portTICK_RATE_MS);
         wait_count +=1;
     }
@@ -164,6 +170,10 @@ static void stop_webserver() {
 
 void enrollment_manager_init(wifi_event_callback_t wifi_callback) {
 
+    utils_generate_random_ssid(ssid, SSID_LENGTH);
+    utils_generate_random_pwd(pwd, PWD_LENGTH);
+    verification_token = rand() % 1000000;
+    
 	event_callback = wifi_callback;
 	ESP_LOGI(TAG, "configuring enrollment manager start...");
     
@@ -185,17 +195,30 @@ void enrollment_manager_init(wifi_event_callback_t wifi_callback) {
 
     wifi_config_t wifi_config = {
         .ap = {
-            .ssid = SSID,
-            .ssid_len = strlen(SSID),
-            .password = PWD,
+            .ssid_len = strlen(ssid),
             .max_connection = 1,
             .authmode = WIFI_AUTH_WPA_WPA2_PSK
         },
     };
+
+    strcpy((char *)wifi_config.ap.ssid,(char *)ssid);
+    strcpy((char *)wifi_config.ap.password,(char *)pwd);
 
     esp_wifi_set_mode(WIFI_MODE_APSTA);
     esp_wifi_set_config(ESP_IF_WIFI_AP, &wifi_config);
     esp_wifi_start();
 
 	server = start_webserver();
+}
+
+int enrollment_manager_get_verification_code() {
+    return verification_token;
+}
+
+char* enrollment_manager_get_ssid() {
+    return ssid;
+}
+
+char* enrollment_manager_get_password() {
+    return pwd;
 }
