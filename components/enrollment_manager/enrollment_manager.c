@@ -172,7 +172,7 @@ void enrollment_manager_init(wifi_event_callback_t wifi_callback) {
 
     utils_generate_random_ssid(ssid, SSID_LENGTH);
     utils_generate_random_pwd(pwd, PWD_LENGTH);
-    verification_token = rand() % 1000000;
+    verification_token = utils_generate_random_token();
     
 	event_callback = wifi_callback;
 	ESP_LOGI(TAG, "configuring enrollment manager start...");

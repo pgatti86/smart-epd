@@ -18,4 +18,6 @@ char* enrollment_manager_get_ssid();
 
 char* enrollment_manager_get_password();
 
+int utils_generate_random_token();
+
 #endif /* COMPONENTS_ENROLLMENT_MANAGER_INCLUDE_ENROLLMENT_MANAGER_H_ */
