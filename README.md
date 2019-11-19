@@ -37,7 +37,7 @@ Save and exit.
 Back in CLI run "make" command.
 You can check partition table with "make partition_table" command.
 
-### Spiffs partition generation
+## Spiffs partition generation
 
 Look for spiffs folder in project, it contains:
 
