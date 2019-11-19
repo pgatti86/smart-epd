@@ -182,8 +182,10 @@ void epd_manager_update(time_info_t *dst, float temperature, float humidity, boo
     epd.DisplayFrame();
 
     display_refresh_count = display_refresh_count == CONFIG_MAX_REWRITE_COUNT ? 
-      0 : display_refresh_count + 1;   
+      0 : display_refresh_count + 1;
+  }
 
+  if (!force_update) {
     clockData.update_data(dst, temperature, humidity, is_connected);   
   }
 }

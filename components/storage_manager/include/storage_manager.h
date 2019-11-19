@@ -21,8 +21,14 @@ void storage_manager_set_enrollment_status(int status);
 
 void storage_manager_close_nvs();
 
-void storage_manager_close_nvs();
-
 void storage_manager_format_nvs();
 
-#endif /* COMPONENTS_TIME_MANAGER_INCLUDE_TIME_MANAGER_H_ */
+char* storage_manager_get_device_config_from_spiffs();
+
+char* storage_manager_get_ca_cert_from_spiffs();
+
+char* storage_manager_get_device_cert_from_spiffs();
+
+char* storage_manager_get_device_key_from_spiffs();
+
+#endif

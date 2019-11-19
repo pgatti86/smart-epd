@@ -17,6 +17,7 @@
 #include "strings.h"
 #include <stdlib.h>
 #include "utils.h"
+#include "storage_manager.h"
 
 static const char *TAG = "enrollment_manager";
 
@@ -111,6 +112,8 @@ static esp_err_t credentials_post_handler(httpd_req_t *req) {
         (!cJSON_IsString(pwdJson) || (pwdJson->valuestring == NULL)) ||
         (!cJSON_IsNumber(codeJson)) || (codeJson->valueint != verification_token)) {            
         httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, NULL);
+        
+        cJSON_Delete(root);
         return ESP_FAIL;
     }
 
@@ -118,11 +121,12 @@ static esp_err_t credentials_post_handler(httpd_req_t *req) {
     strcpy((char *)wifi_config.sta.ssid,(char *)ssidJson->valuestring);
     strcpy((char *)wifi_config.sta.password,(char *)pwdJson->valuestring);
 
-    esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config);
-    esp_wifi_connect();
     cJSON_Delete(root);
+    esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config);
     
     conn_status = unknown;
+    esp_wifi_connect();
+    
     int wait_count = 0;
     while (conn_status == unknown && wait_count < MAX_WAIT_COUNT) {
         vTaskDelay(250 / portTICK_RATE_MS);
@@ -130,8 +134,25 @@ static esp_err_t credentials_post_handler(httpd_req_t *req) {
     }
 
     if (conn_status == connected) {
-        httpd_resp_send(req, NULL, 0);
+
+        char *device_config = storage_manager_get_device_config_from_spiffs();
+        cJSON *json_conf = cJSON_Parse(device_config);
+        
+        if (json_conf == NULL) {
+            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, NULL);
+            free(device_config);
+            storage_manager_format_nvs();
+            return ESP_FAIL;
+        }
+
+        char *response = cJSON_PrintUnformatted(json_conf);
+        httpd_resp_send(req, response, strlen(response));
         xTaskCreate(&reset_task, "reset_task", 2048, NULL, 5, NULL);
+        
+        free(device_config);
+        cJSON_Delete(json_conf);
+        free(response);
+
         return ESP_OK;
     }
     
