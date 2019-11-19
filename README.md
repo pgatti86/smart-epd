@@ -52,7 +52,7 @@ Look for spiffs folder in project, it contains:
 
 - spiffsgen.py: script used to generate *.img partitions
 
-- esptool.py: script to write partitions generated with the above command into target device flash memory
+- esptool.py: script to write partitions generated with the above script into target device flash memory
 
 To generate and flash the device configuration image use the following commands
 
@@ -62,7 +62,7 @@ spiffsgen.py 204800 ~/device-folder-path ~/destination-path/device.bin
 esptool.py --chip esp32 --port /dev/cu.SLAB_USBtoUART --baud 921600 write_flash 0x311000 ~/img-path/device.bin
 ```
 
-To generate and flash the device sucuity image use the following commands
+To generate and flash the device secuity image use the following commands
 
 ```console
 spiffsgen.py 204800 ~/security-folder-path/security ~/destination-path/security.bin
@@ -83,6 +83,9 @@ After connecting to the device network you need to send the following paylod at 
 }
 ```
 
+cURL example
+
+```console
 curl -X POST \
   http://192.168.1.1/setCredentials \
   -d '{
@@ -90,6 +93,7 @@ curl -X POST \
 "password": "PASSWORD",
 "code" : 75091
 }'
+```
 
 ## Reset
 
