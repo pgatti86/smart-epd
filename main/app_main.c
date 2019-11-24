@@ -47,6 +47,23 @@ static void enrollment_manager_callback(int event_id) {
   }
 }
 
+void enrollment_task(void *args) {
+
+  enrollment_manager_init(enrollment_manager_callback);
+
+  char *ssid =  enrollment_manager_get_ssid();
+  ESP_LOGI(TAG, "enrollment ssid: %s", ssid);
+  char *pwd = enrollment_manager_get_password();
+  ESP_LOGI(TAG, "enrollment password: %s", pwd);
+  int token = enrollment_manager_get_verification_code();
+  ESP_LOGI(TAG, "enrollment token: %d", token);
+  epd_manager_show_enrollment(ssid, pwd, token);
+
+  while (1) {
+    vTaskDelay(500 / portTICK_RATE_MS);
+  }
+}
+
 void app_task(void *pvParameter) {
 
   ESP_LOGI(TAG, "init wifi_manager");
@@ -97,13 +114,8 @@ void app_main() {
   epd_manager_init();
 
   if (!storage_manager_has_enrollment_done()) {
-    enrollment_manager_init(enrollment_manager_callback);
-
-    char *ssid =  enrollment_manager_get_ssid();
-    char *pwd = enrollment_manager_get_password();
-    int token = enrollment_manager_get_verification_code();
-    epd_manager_show_enrollment(ssid, pwd, token);
+    xTaskCreate(&enrollment_task, "enrollment_task", 4096, NULL, 5, NULL);   
   } else {
-    xTaskCreate(&app_task, "app_task", 4096, NULL, 5, NULL);
+    xTaskCreate(&app_task, "app_task", 4096, NULL, 5, NULL);  
   }
 }

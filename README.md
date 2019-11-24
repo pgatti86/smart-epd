@@ -18,7 +18,7 @@ build system [reference](https://docs.espressif.com/projects/esp-idf/en/v3.3/api
 
 Before flashing the app you need to confifure the device with **make menuconfig** command:
 
-### Configure WiFi credentials [OLD, see enrollment below]
+### Configure WiFi credentials [OLD, not used anymore. See enrollment below]
 
 Look for "SMART-EPD config" menù and enter your wifi credentials.
 This option will be removed when the enrollment feature will be completed.
@@ -98,6 +98,7 @@ curl -X POST \
 ## Reset
 
 You can reset the device pressing and holding the right module button for at least 3 seconds.
+After reset the device will return in enrollment mode.
 
 ## How connect eink display
 
