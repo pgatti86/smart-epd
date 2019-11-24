@@ -192,6 +192,8 @@ void epd_manager_update(time_info_t *dst, float temperature, float humidity, boo
 
 void epd_manager_show_enrollment(char *ssid, char *pwd, int code) {
     
+    epd_manager_full_clear();
+
     epd_manager_set_paint(SCREEN_WIDTH, SCREEN_HEIGHT, UNCOLORED);
     
     paint.DrawStringAt(10, 10, "ENROLLMENT MODE:", &Font24, COLORED);
