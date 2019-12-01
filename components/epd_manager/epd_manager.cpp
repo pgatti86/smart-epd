@@ -68,8 +68,13 @@ static void epd_manager_draw_grid() {
 }
 
 static void epd_manager_draw_status_bar(bool is_connected) {
-  const unsigned char *icon = is_connected ? WIFI_IMAGE_DATA : NO_WIFI_IMAGE_DATA;
-  epd.SetFrameMemory(icon, SCREEN_HEIGHT - 16, SCREEN_WIDTH - 24, 16, 16);
+
+  if(!is_connected) {
+    epd.SetFrameMemory(NO_WIFI_IMAGE_DATA, SCREEN_HEIGHT - 16, SCREEN_WIDTH - 24, 16, 16);
+  } else {
+      epd_manager_set_paint(16, 16, UNCOLORED);
+      epd_manager_draw_paint(SCREEN_WIDTH - 24, 0);
+  }
 }
 
 static void epd_manager_draw_date(time_info_t *dst) {
@@ -86,6 +91,10 @@ static void epd_manager_draw_date(time_info_t *dst) {
   paint.DrawStringAt(8, 8, day_buffer, &Font12, COLORED);
   paint.DrawStringAt(8, 24, date_buffer, &Font16, COLORED);
   epd_manager_draw_paint(0, SCREEN_HEIGHT - paint_height);
+}
+
+static void epd_manager_draw_weather() {
+  epd.SetFrameMemory(WEATHER_SUN_CLOUD_IMAGE_DATA, 80, 24, 40, 40);
 }
 
 static void epd_manager_draw_time(time_info_t *dst) {
@@ -110,12 +119,12 @@ static void epd_manager_draw_dht_data(float t, float h) {
   sprintf(hum_buffer, "%.1f%%", h); 
   epd_manager_set_paint(64, 24, UNCOLORED);
   paint.DrawStringAt(0, 0, hum_buffer, &Font16, COLORED);
-  epd_manager_draw_paint(228, SCREEN_HEIGHT - paint.GetWidth());
+  epd_manager_draw_paint(232, SCREEN_HEIGHT - paint.GetWidth());
 }
 
 static void epd_manager_draw_static_images() {
   epd.SetFrameMemory(TEMP_IMAGE_DATA, 8, 104, 24, 24);
-  epd.SetFrameMemory(DROP_IMAGE_DATA, 8, 200, 24, 24);
+  epd.SetFrameMemory(DROP_IMAGE_DATA, 8, 204, 24, 24);
 }
 
 void epd_manager_init() {
@@ -145,6 +154,7 @@ void epd_manager_update(time_info_t *dst, float temperature, float humidity, boo
   if (force_update) {
     epd_manager_draw_grid();
     epd_manager_draw_static_images();
+    epd_manager_draw_weather();
     ESP_LOGD(TAG, "Drawing grid and static images");
   }
 
