@@ -9,6 +9,8 @@ extern "C" {
 #endif
     void time_formatter_format_current_date(time_info_t *timeinfo, char *dst);
 
+    void time_formatter_format_current_day(time_info_t *timeinfo, char *dst);
+
     void time_formatter_format_current_time(time_info_t *timeinfo, char *dst);
 
     void time_formatter_format_current_seconds(time_info_t *timeinfo, char *dst);

@@ -90,7 +90,7 @@ void app_task(void *pvParameter) {
 
     epd_manager_update(&dst, t, h, is_connected);
 
-    vTaskDelay(250 / portTICK_RATE_MS);
+    vTaskDelay(1000 / portTICK_RATE_MS);
   }
 }
 
