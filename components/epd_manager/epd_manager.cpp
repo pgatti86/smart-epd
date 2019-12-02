@@ -94,7 +94,11 @@ static void epd_manager_draw_date(time_info_t *dst) {
 }
 
 static void epd_manager_draw_weather() {
-  epd.SetFrameMemory(WEATHER_SUN_CLOUD_IMAGE_DATA, 80, 24, 40, 40);
+  epd.SetFrameMemory(WEATHER_RAIN_IMAGE_DATA, 72, 24, 48, 48);
+
+  epd_manager_set_paint(64, 16, UNCOLORED);
+  paint.DrawStringAt(0, 0, "2.2/8.0", &Font12, COLORED);
+  epd_manager_draw_paint(20, 64);
 }
 
 static void epd_manager_draw_time(time_info_t *dst) {
