@@ -1,0 +1,6 @@
+#ifndef COMPONENTS_WEATHER_MANAGER_INCLUDE_WEATHER_MANAGER_H_
+#define COMPONENTS_WEATHER_MANAGER_INCLUDE_WEATHER_MANAGER_H_
+
+void weather_manager_update_weather();
+
+#endif 
