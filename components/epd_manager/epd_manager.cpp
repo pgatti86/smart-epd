@@ -93,12 +93,51 @@ static void epd_manager_draw_date(time_info_t *dst) {
   epd_manager_draw_paint(0, SCREEN_HEIGHT - paint_height);
 }
 
-static void epd_manager_draw_weather() {
-  epd.SetFrameMemory(WEATHER_RAIN_IMAGE_DATA, 72, 24, 48, 48);
+static void epd_manager_draw_weather(enum weather_icons weather_icon, char *description) {
+  
+  const unsigned char *icon;
 
-  epd_manager_set_paint(64, 16, UNCOLORED);
-  paint.DrawStringAt(0, 0, "2.2/8.0", &Font12, COLORED);
-  epd_manager_draw_paint(20, 64);
+  switch (weather_icon) {
+    case CLEAR_SKY_DAY:
+      icon = WEATHER_CLEAR_D_IMAGE_DATA;
+      break;
+    case CLEAR_SKY_NIGHT:
+      icon = WEATHER_CLEAR_N_IMAGE_DATA;
+      break;
+    case FEW_CLOUDS_DAY:
+      icon = WEATHER_FEW_CLOUD_D_IMAGE_DATA;
+      break;
+    case FEW_CLOUDS_NIGHT:
+      icon = WEATHER_FEW_CLOUDS_N_IMAGE_DATA;
+      break;
+    case CLOUDS:
+      icon = WEATHER_CLOUDS_IMAGE_DATA;
+      break;
+    case SHOWER_RAIN:
+      icon = WEATHER_SHOWER_IMAGE_DATA;
+      break;
+    case RAIN:
+      icon = WEATHER_RAIN_IMAGE_DATA;
+      break;
+    case THUNDERSTORM:
+      icon = WEATHER_THUNDERSTORM_IMAGE_DATA;
+      break;
+    case SNOW:
+      icon = WEATHER_SNOW_IMAGE_DATA;
+      break;
+    case FOG:
+      icon = WEATHER_FOG_IMAGE_DATA;
+      break;
+    default:
+      icon = WEATHER_FEW_CLOUD_D_IMAGE_DATA;
+      break;
+  }
+
+  epd.SetFrameMemory(icon, 72, 24, 48, 48);
+
+  epd_manager_set_paint(96, 16, UNCOLORED);
+  paint.DrawStringAt(0, 0, description, &Font12, COLORED);
+  epd_manager_draw_paint(8, 64);
 }
 
 static void epd_manager_draw_time(time_info_t *dst) {
@@ -146,19 +185,19 @@ void epd_manager_init() {
   paint.SetRotate(ROTATE_90);
 }
 
-void epd_manager_update(time_info_t *dst, float temperature, float humidity, bool is_connected) {
+void epd_manager_update(time_info_t *dst, float temperature, float humidity, 
+    bool is_connected, enum weather_icons weather_icon, char* weather_description) {
 
   if (display_refresh_count == 0) {
     epd_manager_full_clear();
   }
 
   bool force_update = display_refresh_count < 2;
-  bool need_update = clockData.has_data_changed(dst, temperature, humidity, is_connected);
+  bool need_update = clockData.has_data_changed(dst, temperature, humidity, is_connected, weather_icon);
 
   if (force_update) {
     epd_manager_draw_grid();
     epd_manager_draw_static_images();
-    epd_manager_draw_weather();
     ESP_LOGD(TAG, "Drawing grid and static images");
   }
 
@@ -182,6 +221,11 @@ void epd_manager_update(time_info_t *dst, float temperature, float humidity, boo
     epd_manager_draw_dht_data(temperature, humidity);
   } 
 
+  if (force_update || (need_update && clockData.has_weather_data_changed(weather_icon))) {
+    ESP_LOGD(TAG, "Drawing weather");
+    epd_manager_draw_weather(weather_icon, weather_description);
+  } 
+
   if (force_update || need_update) {
     epd.DisplayFrame();
 
@@ -190,7 +234,7 @@ void epd_manager_update(time_info_t *dst, float temperature, float humidity, boo
   }
 
   if (!force_update) {
-    clockData.update_data(dst, temperature, humidity, is_connected);   
+    clockData.update_data(dst, temperature, humidity, is_connected, weather_icon);   
   }
 }
 

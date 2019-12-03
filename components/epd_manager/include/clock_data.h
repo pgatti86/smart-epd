@@ -3,6 +3,7 @@
 
 #include "time.h"
 #include "time_info.h"
+#include "weather_icons.h"
 
 class ClockData {
     
@@ -21,17 +22,21 @@ class ClockData {
         float temperature = -100;
         float humidity = -100;
 
+        int weather_data_update_count = 0;
+        enum weather_icons weather_icon = UNKNOWN;
+
     public:
         ClockData(void) {}
         ~ClockData(void) {}
     
-        bool has_data_changed(time_info_t *time, float temperature, float humidity, bool is_connected) {
+        bool has_data_changed(time_info_t *time, float temperature, float humidity, bool is_connected, enum weather_icons weather_icon) {
             
             return this->minutes != time->tm_min ||
                 this->day != time->tm_yday ||
                 this->is_connected != is_connected ||
                 this->temperature != temperature ||
-                this->humidity != humidity;
+                this->humidity != humidity ||
+                this->weather_icon != weather_icon;
         }
 
         bool has_time_changed(time_info_t *t) {
@@ -78,13 +83,25 @@ class ClockData {
             return false;
         }
 
-        void update_data(time_info_t *time, float temperature, float humidity, bool is_connected) {
+        bool has_weather_data_changed(enum weather_icons weather_icon) {
+            
+            bool has_data_changed = this->weather_icon != weather_icon;
+            if (has_data_changed || weather_data_update_count %2 != 0) {
+                weather_data_update_count +=1;
+                return true;
+            } 
+
+            return false;
+        }
+
+        void update_data(time_info_t *time, float temperature, float humidity, bool is_connected, enum weather_icons weather_icon) {
             
             this->minutes = time->tm_min;
             this->day = time->tm_yday;
             this->is_connected = is_connected;
             this->temperature = temperature;
             this->humidity = humidity;
+            this->weather_icon = weather_icon;
         }
 };
 

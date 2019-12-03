@@ -11,6 +11,7 @@
 #include "dht_manager.h"
 #include "gpio_manager.h"
 #include "storage_manager.h"
+#include "weather_manager.h"
 
 static const char *TAG = "MAIN";
 
@@ -29,6 +30,7 @@ static void wifi_manager_callback(int event_id) {
   switch (event_id) {
   case SYSTEM_EVENT_STA_GOT_IP:
     time_manager_sync_time(true);
+    weather_manager_init();
     break;
   case SYSTEM_EVENT_STA_LOST_IP:
   case SYSTEM_EVENT_STA_DISCONNECTED:
@@ -86,9 +88,12 @@ void app_task(void *pvParameter) {
     float t = dht_manager_getTemperature();
     float h = dht_manager_getHumidity();
 
+    char *weather_description = weather_manager_get_weather_description();
+    enum weather_icons weather_icon = weather_manager_get_weather_icon();
+
     bool is_connected = wifi_manager_is_sta_connected();
 
-    epd_manager_update(&dst, t, h, is_connected);
+    epd_manager_update(&dst, t, h, is_connected, weather_icon, weather_description);
 
     vTaskDelay(1000 / portTICK_RATE_MS);
   }

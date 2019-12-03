@@ -1,17 +1,11 @@
 menu "SMART-EPD config"
 
-config ESP_WIFI_SSID
-    string "WiFi SSID"
-    default "myssid"
+config WEATHER_API_KEY
+    string "Open Weather api key"
+	default "xxxxxxx"
     help
-		SSID (network name) for the example to connect to.
+	    Open Weather api key
 
-config ESP_WIFI_PASSWORD
-    string "WiFi Password"
-    default "mypassword"
-    help
-		WiFi password (WPA or WPA2) for the example to use.
- 
 config SNTP_SERVER
     string "SNTP Server"
 	default "pool.ntp.org"
@@ -26,7 +20,9 @@ config BUTTON_GPIO
     default 0    
 
 config MAX_REWRITE_COUNT
-    int "Run a full screen clean after the specified number"
-    default 3600    
-			
+    int "Max number of screen rewrite before full clean"
+    default 3600
+    help
+        Eink display needs a full refresh after some write cycles. The Eink display is update once a second if needed.
+	    			
 endmenu
