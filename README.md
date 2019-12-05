@@ -35,8 +35,7 @@ You can check partition table with "make partition_table" command.
 ### Open weather API key
 
 You need an open api key for weather updates.
-Register your account at https://openweathermap.org/api
-and set your api key in menuconfig.
+Register your account at https://openweathermap.org and set your api key in menuconfig.
 
 Note: Actually forecast requests have zip code parameter hardcoded (25100).
 
