@@ -18,11 +18,6 @@ build system [reference](https://docs.espressif.com/projects/esp-idf/en/v3.3/api
 
 Before flashing the app you need to confifure the device with **make menuconfig** command:
 
-### Configure WiFi credentials [OLD, not used anymore. See enrollment below]
-
-Look for "SMART-EPD config" menù and enter your wifi credentials.
-This option will be removed when the enrollment feature will be completed.
-
 ### Partition Tables
 
 The app uses a custom partition table defined in partitions.csv file:
@@ -36,6 +31,14 @@ In "Serial flasher" menù enter "Flash size" sub-menù and select 4MB.
 Save and exit.
 Back in CLI run "make" command.
 You can check partition table with "make partition_table" command.
+
+### Open weather API key
+
+You need an open api key for weather updates.
+Register your account at https://openweathermap.org/api
+and set your api key in menuconfig.
+
+Note: Actually forecast requests have zip code parameter hardcoded (25100).
 
 ## Spiffs partition generation
 
