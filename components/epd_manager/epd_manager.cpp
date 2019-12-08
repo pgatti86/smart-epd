@@ -135,8 +135,11 @@ static void epd_manager_draw_weather(enum weather_icons weather_icon, char *desc
 
   epd.SetFrameMemory(icon, 72, 24, 48, 48);
 
-  epd_manager_set_paint(96, 16, UNCOLORED);
-  paint.DrawStringAt(0, 0, description, &Font12, COLORED);
+  int description_length = strlen(description);
+  int description_text_width = 96;
+  int description_padding = (((description_text_width / 8) - description_length) / 2) * 8;
+  epd_manager_set_paint(description_text_width, 16, UNCOLORED);
+  paint.DrawStringAt(description_padding, 0, description, &Font12, COLORED);
   epd_manager_draw_paint(8, 64);
 }
 
