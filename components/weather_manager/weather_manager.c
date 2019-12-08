@@ -128,7 +128,7 @@ static void update_weather_task(void *pvParameters) {
 
         esp_http_client_cleanup(client);
 
-        vTaskDelay(1000 * 60 * 30 / portTICK_RATE_MS);
+        vTaskDelay(1000 * 60 * 15 / portTICK_RATE_MS);
    } 
 
    vTaskDelete(NULL);
