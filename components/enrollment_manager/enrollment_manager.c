@@ -106,6 +106,7 @@ static esp_err_t credentials_post_handler(httpd_req_t *req) {
 
     cJSON *ssidJson = cJSON_GetObjectItemCaseSensitive(root, "ssid");
     cJSON *pwdJson = cJSON_GetObjectItemCaseSensitive(root, "password");
+    cJSON *zipJson = cJSON_GetObjectItemCaseSensitive(root, "zip");
     cJSON *codeJson = cJSON_GetObjectItemCaseSensitive(root, "code");
     
     if ((!cJSON_IsString(ssidJson) || (ssidJson->valuestring == NULL)) ||
@@ -115,6 +116,10 @@ static esp_err_t credentials_post_handler(httpd_req_t *req) {
         
         cJSON_Delete(root);
         return ESP_FAIL;
+    }
+
+    if (cJSON_IsNumber(zipJson)) {
+        storage_manager_set_weather_zip_code(zipJson->valueint);
     }
 
     wifi_config_t wifi_config =  {};

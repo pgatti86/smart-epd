@@ -11,6 +11,7 @@
 #include "epd_images.h"
 #include "time_formatter.h"
 #include "clock_data.h"
+#include "strings.h"
 
 #include "epd_manager.h"
 
@@ -137,7 +138,7 @@ static void epd_manager_draw_weather(enum weather_icons weather_icon, char *desc
 
   int description_length = strlen(description);
   int description_text_width = 96;
-  int description_padding = (((description_text_width / 8) - description_length) / 2) * 8;
+  int description_padding = (((description_text_width / 7) - description_length) / 2) * 7;
   epd_manager_set_paint(description_text_width, 16, UNCOLORED);
   paint.DrawStringAt(description_padding, 0, description, &Font12, COLORED);
   epd_manager_draw_paint(8, 64);
@@ -196,7 +197,7 @@ void epd_manager_update(time_info_t *dst, float temperature, float humidity,
   }
 
   bool force_update = display_refresh_count < 2;
-  bool need_update = clockData.has_data_changed(dst, temperature, humidity, is_connected, weather_icon);
+  bool need_update = clockData.has_data_changed(dst, temperature, humidity, is_connected, weather_icon, weather_description);
 
   if (force_update) {
     epd_manager_draw_grid();
@@ -224,8 +225,8 @@ void epd_manager_update(time_info_t *dst, float temperature, float humidity,
     epd_manager_draw_dht_data(temperature, humidity);
   } 
 
-  if (force_update || (need_update && clockData.has_weather_data_changed(weather_icon))) {
-    ESP_LOGD(TAG, "Drawing weather");
+  if (force_update || (need_update && clockData.has_weather_data_changed(weather_icon, weather_description))) {
+    ESP_LOGI(TAG, "Drawing weather");
     epd_manager_draw_weather(weather_icon, weather_description);
   } 
 
@@ -237,7 +238,7 @@ void epd_manager_update(time_info_t *dst, float temperature, float humidity,
   }
 
   if (!force_update) {
-    clockData.update_data(dst, temperature, humidity, is_connected, weather_icon);   
+    clockData.update_data(dst, temperature, humidity, is_connected, weather_icon, weather_description);   
   }
 }
 

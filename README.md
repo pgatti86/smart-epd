@@ -50,6 +50,8 @@ Look for spiffs folder in project, it contains:
 }
 ```
 
+NB: an empty line at the end of the config file is mandatory otherwise the json parsing library (cJSON) will fail deserialization.
+
 - security subfolder: currently empty, it will contain the mqtt broker certificates
 
 - spiffsgen.py: script used to generate *.img partitions
@@ -81,9 +83,12 @@ After connecting to the device network you need to send the following paylod at 
 {
 "ssid":"SSID",
 "password": "PASSWORD",
-"code" : 75091
+"zip": "25063",
+"code" : 75091,
 }
 ```
+
+The provided zip code is used for weather forecasting.
 
 cURL example
 

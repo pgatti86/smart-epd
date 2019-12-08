@@ -3,6 +3,7 @@
 
 #include "time.h"
 #include "time_info.h"
+#include "strings.h"
 #include "weather_icons.h"
 
 class ClockData {
@@ -23,20 +24,23 @@ class ClockData {
         float humidity = -100;
 
         int weather_data_update_count = 0;
+        char weather_description [15];
         enum weather_icons weather_icon = UNKNOWN;
 
     public:
         ClockData(void) {}
         ~ClockData(void) {}
     
-        bool has_data_changed(time_info_t *time, float temperature, float humidity, bool is_connected, enum weather_icons weather_icon) {
+        bool has_data_changed(time_info_t *time, float temperature, float humidity, bool is_connected, 
+                enum weather_icons weather_icon, char *weather_description) {
             
             return this->minutes != time->tm_min ||
                 this->day != time->tm_yday ||
                 this->is_connected != is_connected ||
                 this->temperature != temperature ||
                 this->humidity != humidity ||
-                this->weather_icon != weather_icon;
+                this->weather_icon != weather_icon || 
+                strcmp(this->weather_description, weather_description) != 0;
         }
 
         bool has_time_changed(time_info_t *t) {
@@ -83,9 +87,11 @@ class ClockData {
             return false;
         }
 
-        bool has_weather_data_changed(enum weather_icons weather_icon) {
+        bool has_weather_data_changed(enum weather_icons weather_icon, char *weather_description) {
             
-            bool has_data_changed = this->weather_icon != weather_icon;
+            bool has_data_changed = this->weather_icon != weather_icon || 
+                strcmp(this->weather_description, weather_description) != 0;
+
             if (has_data_changed || weather_data_update_count %2 != 0) {
                 weather_data_update_count +=1;
                 return true;
@@ -94,7 +100,8 @@ class ClockData {
             return false;
         }
 
-        void update_data(time_info_t *time, float temperature, float humidity, bool is_connected, enum weather_icons weather_icon) {
+        void update_data(time_info_t *time, float temperature, float humidity, bool is_connected, 
+                enum weather_icons weather_icon, char *weather_description) {
             
             this->minutes = time->tm_min;
             this->day = time->tm_yday;
@@ -102,6 +109,7 @@ class ClockData {
             this->temperature = temperature;
             this->humidity = humidity;
             this->weather_icon = weather_icon;
+            strcpy(this->weather_description, weather_description);
         }
 };
 

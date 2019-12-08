@@ -6,6 +6,7 @@
 #include "esp_system.h"
 #include "esp_http_client.h"
 #include "cJSON.h"
+#include "storage_manager.h"
 #include "weather_manager.h"
 
 #define MAX_HTTP_RECV_BUFFER 512
@@ -106,8 +107,9 @@ static void update_weather_task(void *pvParameters) {
         
         weather_data_index = 0;
         char request[200];
+        int zip_code = storage_manager_get_weather_zip_code();
         snprintf(request, 200, "https://api.openweathermap.org/data/2.5/weather?zip=%d,it&appid=%s&units=metric", 
-            25100, CONFIG_WEATHER_API_KEY);
+            zip_code, CONFIG_WEATHER_API_KEY);
 
         esp_http_client_config_t config = {
             .url = request,

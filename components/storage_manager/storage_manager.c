@@ -12,6 +12,8 @@ static const char *TAG = "STORAGE MANAGER";
 
 static const char* ENROLLMENTSTATUS_KEY =  "enr-status"; // max 15 char
 
+static const char* WEATHER_ZIP_KEY =  "zip-code"; // max 15 char
+
 static const char *SPIFFS_DEVICE_PARTITION = "device";
 
 static const char *SPIFFS_SECURITY_PARTITION = "security";
@@ -140,6 +142,26 @@ void storage_manager_init() {
     ESP_LOGI(TAG, "init spiffs storage...");
     storage_manager_device_config_spiffs_init();
     storage_manager_security_spiffs_init();
+}
+
+int storage_manager_get_weather_zip_code() {
+	
+	ESP_LOGI(TAG, "getting enrollment status...");
+	int zip_code = 25100; // default to BS
+
+	if (nvs_memory_handle < 0)
+        return zip_code;
+
+	esp_err_t err = nvs_get_i32(nvs_memory_handle, WEATHER_ZIP_KEY, &zip_code);
+	return zip_code;
+}
+
+void storage_manager_set_weather_zip_code(int zip_code) {
+	
+	if (nvs_memory_handle > 0) {
+        nvs_set_i32(nvs_memory_handle, WEATHER_ZIP_KEY, zip_code);
+        storage_manager_commit();
+    }
 }
 
 int storage_manager_get_enrollment_status() {

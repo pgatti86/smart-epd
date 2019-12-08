@@ -13,6 +13,10 @@
 
 void storage_manager_init();
 
+int storage_manager_get_weather_zip_code();
+
+void storage_manager_set_weather_zip_code(int zip_code);
+
 int storage_manager_get_enrollment_status();
 
 bool storage_manager_has_enrollment_done();
