@@ -24,7 +24,7 @@ class ClockData {
         float humidity = -100;
 
         int weather_data_update_count = 0;
-        char weather_description [15];
+        char weather_description [20];
         enum weather_icons weather_icon = UNKNOWN;
 
     public:
