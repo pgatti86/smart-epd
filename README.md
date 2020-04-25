@@ -1,22 +1,48 @@
 # Smart edp
 
-An IoT project built by an awesome team
+Smart-epd is a study project for the esp32 IDF framework.
+
+The final scope is to build an alarm clock with some added features like temperature and humidity monitoring, local weather infos, and OTA updates.
+
+## BOM
+
+- Any esp32 breakout board
+- Waveshare 2.9inch E-paper Module
+- DHT22 temperature and humidity module
 
 ## Getting Started
 
 This repo depends on epd [library](https://github.com/pgatti86/epd) as git submodule.
 
-To clone the project use **git clone --recursive <project url>** 
+To clone this project use **git clone --recursive <project url>** 
 
 Project Makefile has the following configuration to include the submodule library in the build process:
 
 **EXTRA_COMPONENT_DIRS += $(PROJECT_PATH)/epd/components/**
 
-build system [reference](https://docs.espressif.com/projects/esp-idf/en/v3.3/api-guides/build-system.html)
+The project support both IDFv3 and IDFv4 build systems.
+
+IDFv3 build system [reference](https://docs.espressif.com/projects/esp-idf/en/v3.3/api-guides/build-system.html)
+
+IDFv4 (beta1) build system [reference](https://docs.espressif.com/projects/esp-idf/en/v4.1-beta1/api-guides/build-system.html)
+
+###### *below command may vary based on selected build system (v3 / v4)
 
 ## Configurations
 
-Before flashing the app you need to confifure the device with **make menuconfig** command:
+Before flashing the app you will need to configure the device with **make menuconfig** command:
+
+### App settings
+
+Enter SMART-EPD config menu to configure the application (some defaults values applies)
+
+- WEATHER_API_KEY : forecast API key. See Open weather API key section below
+- SNTP_SERVER: defaults to "pool.ntp.org"
+- DHT_GPIO: reads temperature and humidity from DHT22 on specified GPIO. Defauts to GPIO 4
+- BUTTON_GPIO: wipes the device memory when holded longer then 3s. Defaults to 0 (builtin button)
+- MAX_REWRITE_COUNT: number of screen rewrite before eink full clean apply. Defualts to once in an hour
+
+Save and exit.
 
 ### Partition Tables
 
@@ -37,7 +63,6 @@ You can check partition table with "make partition_table" command.
 You need an open api key for weather updates.
 Register your account at https://openweathermap.org and set your api key in menuconfig.
 
-Note: Actually forecast requests have zip code parameter hardcoded (25100).
 
 ## Spiffs partition generation
 
@@ -50,7 +75,7 @@ Look for spiffs folder in project, it contains:
 }
 ```
 
-NB: an empty line at the end of the config file is mandatory otherwise the json parsing library (cJSON) will fail deserialization.
+#### NB: an empty line at the end of the config file is mandatory otherwise the json parsing library (cJSON) will fail deserialization.
 
 - security subfolder: currently empty, it will contain the mqtt broker certificates
 
