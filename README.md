@@ -65,6 +65,16 @@ You can check partition table with "make partition_table" command.
 You need an open api key for weather updates.
 Register your account at https://openweathermap.org and set your api key in menuconfig.
 
+### Timezon
+
+Actually timezone is hardcoded. You need to manually adjust the TZ environment variable in time_manager.c file.
+Look for time_manager_init function and change TZ based on your location.
+I will externalize this configuration asap.
+
+The current TZ value is "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00" (Europe, Rome)
+
+Here some detail on [TZ variable](https://www.gnu.org/software/libc/manual/html_node/TZ-Variable.html)
+Here some [abbreviations](https://remotemonitoringsystems.ca/time-zone-abbreviations.php)
 
 ## Spiffs partition generation
 
