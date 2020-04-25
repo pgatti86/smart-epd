@@ -155,6 +155,10 @@ After reset the device will return in enrollment mode.
 | RST | GPIO_NUM_27  |
 | BUSY | GPIO_NUM_32  |
 
+## 3d print
+
+3d print folder contains required stl files.
+
 ## Custom fonts
 
 To create custom fonts you need to generate a PNG file with all required characters (95).
