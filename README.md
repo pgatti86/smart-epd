@@ -4,6 +4,8 @@ Smart-epd is a study project for the esp32 IDF framework.
 
 The final scope is to build an alarm clock with some added features like temperature and humidity monitoring, local weather infos, and OTA updates.
 
+[smart-epd.jpg](https://postimg.cc/30CR4qC7)
+
 ## BOM
 
 - Any esp32 breakout board (with at least 4MB flash size)
