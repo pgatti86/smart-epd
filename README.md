@@ -6,8 +6,8 @@ The final scope is to build an alarm clock with some added features like tempera
 
 ## BOM
 
-- Any esp32 breakout board
-- Waveshare 2.9inch E-paper Module
+- Any esp32 breakout board (with at least 4MB flash size)
+- Waveshare 2.9inch E-paper Module (296x128 px)
 - DHT22 temperature and humidity module
 
 ## Getting Started
