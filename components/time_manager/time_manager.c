@@ -43,6 +43,7 @@ void time_manager_init() {
 	sntp_setoperatingmode(SNTP_OPMODE_POLL);
 	sntp_setservername(0, CONFIG_SNTP_SERVER);
 	setenv("TZ", "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00", 1);
+	tzset();
 	sntp_init();
 }
 
