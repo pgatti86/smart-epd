@@ -222,3 +222,7 @@ char* storage_manager_get_device_cert_from_spiffs() {
 char* storage_manager_get_device_key_from_spiffs() {
 	return storage_manager_read_file_from_spiffs("/security/devkey.pem");
 }
+
+char* storage_manager_get_ota_cert_from_spiffs() {
+	return storage_manager_read_file_from_spiffs("/security/ota_cert.pem");
+}

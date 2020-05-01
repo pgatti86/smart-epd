@@ -10,6 +10,10 @@ config SNTP_SERVER
     string "SNTP Server"
 	default "pool.ntp.org"
 
+config OTA_SERVER
+    string "OTA Server"
+	default "https://mydomain.com/smart-epd.bin"    
+
 config DHT_GPIO
     int "DHT GPIO"
     default 4
