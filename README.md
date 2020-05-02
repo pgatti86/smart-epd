@@ -37,7 +37,7 @@ Before flashing the app you will need to configure the device with **make menuco
 Enter SMART-EPD config menu to configure the application (some defaults values applies)
 
 - SNTP_SERVER: defaults to "pool.ntp.org"
-- OTA_SERVER: https server that host your generated bin file. 
+- OTA_SERVER: https server that hosts your generated bin file. 
 - DHT_GPIO: reads temperature and humidity from DHT22 on specified GPIO. Defauts to GPIO 4
 - BUTTON_GPIO: wipes the device memory when holded longer then 3s. Defaults to 0 (builtin button)
 - MAX_REWRITE_COUNT: number of screen rewrite before eink full clean apply. Defualts to once in an hour
@@ -60,8 +60,7 @@ You can check partition table with "make partition_table" command.
 
 ### Open weather API key
 
-You need an open api key for weather updates.
-Register your account at https://openweathermap.org and set your api key in menuconfig.
+You need an open api key for weather updates, register your account at https://openweathermap.org.
 
 ### Timezone
 
@@ -121,7 +120,7 @@ Flash the binaries that you just built onto your ESP32 board by running **make f
 ## Enrollment
 
 A new device starts in Access Point (AP) mode, it displays WiFi credentials and PoP (proof of possession) token on the screen.
-After connecting to the device network you need to send the following paylod at the device (192.168.1.1) with a POST request:
+After connecting to the device network you need to send the following payload at the device (192.168.1.1) with a POST request:
 
 ```json
 {
