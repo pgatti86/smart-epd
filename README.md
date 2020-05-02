@@ -22,13 +22,11 @@ Project Makefile has the following configuration to include the submodule librar
 
 **EXTRA_COMPONENT_DIRS += $(PROJECT_PATH)/epd/components/**
 
-The project support both IDFv3 and IDFv4 build systems.
+This project is based on Espressif IDF v4.0 (current stable branch).
+Follow this link to configure your environment: [esp idf v4.0](https://docs.espressif.com/projects/esp-idf/en/v4.0/get-started/index.html)
 
-IDFv3 build system [reference](https://docs.espressif.com/projects/esp-idf/en/v3.3/api-guides/build-system.html)
-
-IDFv4 (beta1) build system [reference](https://docs.espressif.com/projects/esp-idf/en/v4.1-beta1/api-guides/build-system.html)
-
-###### *below command may vary based on selected build system (v3 / v4)
+Note: depending on your python virtualenv version you may encounter an error while running ESP install script (install.sh).
+To solve simply remove the invalid option (--no-site-packages) from idf_tools.py 
 
 ## Configurations
 
@@ -38,8 +36,8 @@ Before flashing the app you will need to configure the device with **make menuco
 
 Enter SMART-EPD config menu to configure the application (some defaults values applies)
 
-- WEATHER_API_KEY : forecast API key. See Open weather API key section below
 - SNTP_SERVER: defaults to "pool.ntp.org"
+- OTA_SERVER: https server that host your generated bin file. 
 - DHT_GPIO: reads temperature and humidity from DHT22 on specified GPIO. Defauts to GPIO 4
 - BUTTON_GPIO: wipes the device memory when holded longer then 3s. Defaults to 0 (builtin button)
 - MAX_REWRITE_COUNT: number of screen rewrite before eink full clean apply. Defualts to once in an hour
@@ -86,10 +84,12 @@ Look for spiffs folder in project, it contains:
 "deviceId":"1d3053b1-4c31-40da-9533-2eacca528add"
 }
 ```
-
 #### NB: an empty line at the end of the config file is mandatory otherwise the json parsing library (cJSON) will fail deserialization.
+#### NB: don't change the file name.
 
-- security subfolder: currently empty, it will contain the mqtt broker certificates
+- security subfolder: This folder must contain your server public certificate in PEM format.
+
+#### NB: don't change the file name.
 
 - spiffsgen.py: script used to generate *.img partitions
 
@@ -111,37 +111,47 @@ spiffsgen.py 204800 ~/security-folder-path/security ~/destination-path/security.
 esptool.py --chip esp32 --port /dev/cu.SLAB_USBtoUART --baud 921600 write_flash 0x343000 ~/img-path/security.bin
 ```
 
+
+## Build
+
+You can build this project using **make** or **idf.py build**
+
+Flash the binaries that you just built onto your ESP32 board by running **make flash** or **idf.py -p PORT [-b BAUD] flash**
+
 ## Enrollment
 
-A new device starts in Access Point [AP] mode, it displays WiFi credentials and PoP (proof of possession) token on the screen.
+A new device starts in Access Point (AP) mode, it displays WiFi credentials and PoP (proof of possession) token on the screen.
 After connecting to the device network you need to send the following paylod at the device (192.168.1.1) with a POST request:
 
 ```json
 {
-"ssid":"SSID",
-"password": "PASSWORD",
-"zip": "25063",
-"code" : 75091,
+"ssid":"YOUR_HOME_SSID",
+"password":"PASSWORD",
+"code":123456,
+"zip":25086,
+"wApiKey":"asd123098asdasdasdads"
 }
 ```
 
-The provided zip code is used for weather forecasting.
+The provided zip code and weather api key are used for weather forecasting.
 
 cURL example
 
 ```console
-curl -X POST \
-  http://192.168.1.1/setCredentials \
-  -d '{
-"ssid":"SSID",
-"password": "PASSWORD",
-"code" : 75091
+curl --location --request POST '192.168.1.1/setCredentials' \
+--header 'Content-Type: text/plain' \
+--data-raw '{
+"ssid":"YOUR_HOME_SSID",
+"password":"PASSWORD",
+"code":123456,
+"zip":25086,
+"wApiKey":"asd123098asdasdasdads"
 }'
 ```
 
 ## Reset
 
-You can reset the device pressing and holding the right module button for at least 3 seconds.
+You can reset the device pressing and holding the right module button (builtin) for at least 3 seconds.
 After reset the device will return in enrollment mode.
 
 ## How connect eink display
@@ -154,6 +164,10 @@ After reset the device will return in enrollment mode.
 | DC | GPIO_NUM_26  |
 | RST | GPIO_NUM_27  |
 | BUSY | GPIO_NUM_32  |
+
+## OTA
+
+Before releasing new binaries you must update the build version in version.txt file.
 
 ## 3d print
 
