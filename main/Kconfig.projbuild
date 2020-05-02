@@ -1,11 +1,5 @@
 menu "SMART-EPD config"
 
-config WEATHER_API_KEY
-    string "Open Weather api key"
-	default "xxxxxxx"
-    help
-	    Open Weather api key
-
 config SNTP_SERVER
     string "SNTP Server"
 	default "pool.ntp.org"

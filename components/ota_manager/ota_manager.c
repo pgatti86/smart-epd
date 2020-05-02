@@ -11,7 +11,9 @@
 
 static const char *TAG = "ota manager";
 
-static const int UPDATE_CHECK_TTL = 1000 * 60 * 60;
+static const int UPDATE_CHECK_FREQ = 1000 * 60 * 60;
+
+static const int UPDATE_TIMEOUT = 1000 * 60;
 
 static void ota_manager_check_fw_update();
 
@@ -21,7 +23,7 @@ void ota_manager_ota_task(void *pvParameter) {
     
      while (1) {
         ota_manager_check_fw_update(); 
-        vTaskDelay(UPDATE_CHECK_TTL / portTICK_RATE_MS);
+        vTaskDelay(UPDATE_CHECK_FREQ / portTICK_RATE_MS);
     }
 }
 
@@ -56,6 +58,7 @@ static void ota_manager_check_fw_update() {
     esp_http_client_config_t config = {
         .url = CONFIG_OTA_SERVER,
         .cert_pem = storage_manager_get_ota_cert_from_spiffs(),
+        .timeout_ms = UPDATE_TIMEOUT,
     };
 
     config.skip_cert_common_name_check = true;
@@ -90,10 +93,6 @@ static void ota_manager_check_fw_update() {
         }
        
         ESP_LOGD(TAG, "Image bytes read: %d", esp_https_ota_get_image_len_read(https_ota_handle));
-    }
-
-    if (esp_https_ota_is_complete_data_received(https_ota_handle) != true) {
-        ESP_LOGE(TAG, "Complete data was not received.");
     }
 
     esp_err_t ota_finish_err = esp_https_ota_finish(https_ota_handle);
