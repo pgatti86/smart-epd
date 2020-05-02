@@ -17,6 +17,10 @@ int storage_manager_get_weather_zip_code();
 
 void storage_manager_set_weather_zip_code(int zip_code);
 
+char* storage_manager_get_weather_api_key();
+
+void storage_manager_set_weather_api_key(char *api_key);
+
 int storage_manager_get_enrollment_status();
 
 bool storage_manager_has_enrollment_done();
@@ -34,5 +38,7 @@ char* storage_manager_get_ca_cert_from_spiffs();
 char* storage_manager_get_device_cert_from_spiffs();
 
 char* storage_manager_get_device_key_from_spiffs();
+
+char* storage_manager_get_ota_cert_from_spiffs();
 
 #endif

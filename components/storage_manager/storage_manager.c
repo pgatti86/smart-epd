@@ -1,5 +1,3 @@
-
-
 #include "esp_system.h"
 #include "nvs_flash.h"
 #include "nvs.h"
@@ -13,6 +11,8 @@ static const char *TAG = "STORAGE MANAGER";
 static const char* ENROLLMENTSTATUS_KEY =  "enr-status"; // max 15 char
 
 static const char* WEATHER_ZIP_KEY =  "zip-code"; // max 15 char
+
+static const char* WEATHER_API_KEY =  "w-api-key";
 
 static const char *SPIFFS_DEVICE_PARTITION = "device";
 
@@ -164,6 +164,26 @@ void storage_manager_set_weather_zip_code(int zip_code) {
     }
 }
 
+char* storage_manager_get_weather_api_key() {
+	
+	if (nvs_memory_handle < 0)
+        return NULL;
+
+	size_t required_size;
+	esp_err_t err = nvs_get_str(nvs_memory_handle, WEATHER_API_KEY, NULL, &required_size);
+	char* api_key = malloc(required_size);
+	err = nvs_get_str(nvs_memory_handle, WEATHER_API_KEY, api_key, &required_size);
+
+	return api_key;
+}
+
+void storage_manager_set_weather_api_key(char *api_key) {
+	if (nvs_memory_handle > 0) {
+        nvs_set_str(nvs_memory_handle, WEATHER_API_KEY, api_key);
+        storage_manager_commit();
+    }
+}
+
 int storage_manager_get_enrollment_status() {
 
     ESP_LOGI(TAG, "getting enrollment status...");
@@ -221,4 +241,8 @@ char* storage_manager_get_device_cert_from_spiffs() {
 
 char* storage_manager_get_device_key_from_spiffs() {
 	return storage_manager_read_file_from_spiffs("/security/devkey.pem");
+}
+
+char* storage_manager_get_ota_cert_from_spiffs() {
+	return storage_manager_read_file_from_spiffs("/security/ota_cert.pem");
 }

@@ -108,8 +108,9 @@ static void update_weather_task(void *pvParameters) {
         weather_data_index = 0;
         char request[200];
         int zip_code = storage_manager_get_weather_zip_code();
+        char *api_key = storage_manager_get_weather_api_key();  
         snprintf(request, 200, "https://api.openweathermap.org/data/2.5/weather?zip=%d,it&appid=%s&units=metric", 
-            zip_code, CONFIG_WEATHER_API_KEY);
+            zip_code, api_key);
 
         esp_http_client_config_t config = {
             .url = request,
@@ -128,6 +129,7 @@ static void update_weather_task(void *pvParameters) {
             ESP_LOGE(TAG, "HTTP GET request failed: %s", esp_err_to_name(err));
         }
 
+        free(api_key); 
         esp_http_client_cleanup(client);
 
         vTaskDelay(1000 * 60 * 15 / portTICK_RATE_MS);

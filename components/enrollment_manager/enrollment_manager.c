@@ -76,7 +76,7 @@ static esp_err_t event_handler(void *ctx, system_event_t *event) {
 
 static esp_err_t credentials_post_handler(httpd_req_t *req) {
     
-    char buf[100];
+    char buf[200];
     int ret = 0, remaining = req->content_len;
 
     while (remaining > 0) {
@@ -107,6 +107,7 @@ static esp_err_t credentials_post_handler(httpd_req_t *req) {
     cJSON *ssidJson = cJSON_GetObjectItemCaseSensitive(root, "ssid");
     cJSON *pwdJson = cJSON_GetObjectItemCaseSensitive(root, "password");
     cJSON *zipJson = cJSON_GetObjectItemCaseSensitive(root, "zip");
+    cJSON *weatherApiKeyJson = cJSON_GetObjectItemCaseSensitive(root, "wApiKey");
     cJSON *codeJson = cJSON_GetObjectItemCaseSensitive(root, "code");
     
     if ((!cJSON_IsString(ssidJson) || (ssidJson->valuestring == NULL)) ||
@@ -122,6 +123,10 @@ static esp_err_t credentials_post_handler(httpd_req_t *req) {
         storage_manager_set_weather_zip_code(zipJson->valueint);
     }
 
+    if (cJSON_IsString(weatherApiKeyJson) && weatherApiKeyJson->valuestring != NULL) {
+        storage_manager_set_weather_api_key(weatherApiKeyJson->valuestring);
+    }
+    
     wifi_config_t wifi_config =  {};
     strcpy((char *)wifi_config.sta.ssid,(char *)ssidJson->valuestring);
     strcpy((char *)wifi_config.sta.password,(char *)pwdJson->valuestring);

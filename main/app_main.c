@@ -12,6 +12,7 @@
 #include "gpio_manager.h"
 #include "storage_manager.h"
 #include "weather_manager.h"
+#include "ota_manager.h"
 
 static const char *TAG = "MAIN";
 
@@ -31,10 +32,11 @@ static void wifi_manager_callback(int event_id) {
   case SYSTEM_EVENT_STA_GOT_IP:
     time_manager_sync_time(true);
     weather_manager_init();
+    ota_manager_init();
     break;
   case SYSTEM_EVENT_STA_LOST_IP:
   case SYSTEM_EVENT_STA_DISCONNECTED:
-    //TODO handle event
+    //TODO handle event. STOP tasks already started.
     break;
   }
 }
