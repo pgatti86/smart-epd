@@ -1,4 +1,4 @@
-# Smart edp
+# Smart e-ink paper display
 
 Smart-epd is a study project for the esp32 IDF framework.
 
@@ -55,8 +55,8 @@ You also need to change the embedded flash size:
 In "Serial flasher" menù enter "Flash size" sub-menù and select 4MB.
 
 Save and exit.
-Back in CLI run "make" command.
-You can check partition table with "make partition_table" command.
+Back in CLI run **make** command.
+You can check partition table with **make partition_table** command.
 
 ### Open weather API key
 
@@ -102,7 +102,7 @@ spiffsgen.py 204800 ~/device-folder-path ~/destination-path/device.bin
 esptool.py --chip esp32 --port /dev/cu.SLAB_USBtoUART --baud 921600 write_flash 0x311000 ~/img-path/device.bin
 ```
 
-To generate and flash the device secuity image use the following commands
+To generate and flash the device security image use the following commands
 
 ```console
 spiffsgen.py 204800 ~/security-folder-path/security ~/destination-path/security.bin
