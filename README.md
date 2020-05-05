@@ -8,25 +8,30 @@ The final scope is to build an alarm clock with some added features like tempera
 
 ## BOM
 
-- Any esp32 breakout board (with at least 4MB flash size)
-- Waveshare 2.9inch E-paper Module (296x128 px)
-- DHT22 temperature and humidity module
+- Any [esp32](https://live.staticflickr.com/4764/40089095211_ec1fee0087_b.jpg) breakout board (with at least 4MB flash size)
+- [Waveshare 2.9inch E-paper Module b/w](https://www.waveshare.com/wiki/2.9inch_e-Paper_Module) (296x128 px)
+- [DHT22 temperature and humidity module](https://imgaz.staticbg.com/thumb/large/2014/xiemeijuan/07/SKU146979/SKU146979a.jpg)
+- USB-A to micro USB-B cable
+
+Depending on the store from which you buy the material, the price can vary between 30€ and 50€
+
+DHT22 requires a pullup resistor. I recommend buying a module that integrates resistor and sensor like the one visible in the link above.
 
 ## Getting Started
-
-This repo depends on epd [library](https://github.com/pgatti86/epd) as git submodule.
-
-To clone this project use **git clone --recursive <project url>** 
-
-Project Makefile has the following configuration to include the submodule library in the build process:
-
-**EXTRA_COMPONENT_DIRS += $(PROJECT_PATH)/epd/components/**
 
 This project is based on Espressif IDF v4.0 (current stable branch).
 Follow this link to configure your environment: [esp idf v4.0](https://docs.espressif.com/projects/esp-idf/en/v4.0/get-started/index.html)
 
 Note: depending on your python virtualenv version you may encounter an error while running ESP install script (install.sh).
 To solve simply remove the invalid option (--no-site-packages) from idf_tools.py 
+
+To clone this project use **git clone --recursive git@gitlab.com:paolo.gatti/smart-epd.git** 
+
+This repo depends on epd [library](https://github.com/pgatti86/epd) as git submodule.
+
+Project Makefile has the following configuration to include the submodule library in the build process:
+
+**EXTRA_COMPONENT_DIRS += $(PROJECT_PATH)/epd/components/**
 
 ## Configurations
 
@@ -42,20 +47,22 @@ Enter SMART-EPD config menu to configure the application (some defaults values a
 - BUTTON_GPIO: wipes the device memory when holded longer then 3s. Defaults to 0 (builtin button)
 - MAX_REWRITE_COUNT: number of screen rewrite before eink full clean apply. Defualts to once in an hour
 
-Save and exit.
+Save and return to the main menu.
 
 ### Partition Tables
 
 The app uses a custom partition table defined in partitions.csv file:
 
 In "Partition table" menù select "Partition Table" sub-menù.
-Check the "custom partition table" option.
+Check the "custom partition table CSV" option.
 
-You also need to change the embedded flash size:
-In "Serial flasher" menù enter "Flash size" sub-menù and select 4MB.
+Back in main menu you also need to change the embedded flash size:
+In "Serial flasher" menù enter "Flash size" sub-menù and select the memory size that match your module.
+The minimum size required is 4MB.
 
 Save and exit.
-Back in CLI run **make** command.
+
+Back in CLI run **make** command. It will take a while, have a coffee ;)
 You can check partition table with **make partition_table** command.
 
 ### Open weather API key
@@ -75,18 +82,26 @@ and [abbreviations](https://remotemonitoringsystems.ca/time-zone-abbreviations.p
 
 ## Spiffs partition generation
 
-Look for spiffs folder in project, it contains:
+Look for spiffs folder in project, it contains two sub folders:
 
-- device subfolder: contains the device configurations:
+- device: contains the device configurations in a json file
+generate your new device [uuid](https://it.wikipedia.org/wiki/Universally_unique_identifier) on this [page](https://www.uuidgenerator.net/) 
+
 ```json
 {
 "deviceId":"1d3053b1-4c31-40da-9533-2eacca528add"
 }
 ```
+
+This uuid will be returned by the enrollment process.
+
 #### NB: an empty line at the end of the config file is mandatory otherwise the json parsing library (cJSON) will fail deserialization.
 #### NB: don't change the file name.
 
-- security subfolder: This folder must contain your server public certificate in PEM format.
+- security: This folder must contain your server public certificate in PEM format.
+
+This is required by the OTA process to verify the server before the firmware download can take place.
+The existing certificate is a sample, leave it as is if all this sounds like new to you. Simply the OTA will not work.
 
 #### NB: don't change the file name.
 
@@ -147,6 +162,8 @@ curl --location --request POST '192.168.1.1/setCredentials' \
 "wApiKey":"asd123098asdasdasdads"
 }'
 ```
+
+The response to this POST request will be the previously configured UUID.
 
 ## Reset
 
