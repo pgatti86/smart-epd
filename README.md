@@ -84,8 +84,8 @@ and [abbreviations](https://remotemonitoringsystems.ca/time-zone-abbreviations.p
 
 Look for spiffs folder in project, it contains two sub folders:
 
-- device: contains the device configurations in a json file
-generate your new device [uuid](https://it.wikipedia.org/wiki/Universally_unique_identifier) on this [page](https://www.uuidgenerator.net/) 
+- device: contains the device configurations in a json file.
+Generate your new device [uuid](https://it.wikipedia.org/wiki/Universally_unique_identifier) on this [page](https://www.uuidgenerator.net/) 
 
 ```json
 {
