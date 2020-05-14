@@ -29,15 +29,16 @@ void gpio_event_handler(void *handler_arg, esp_event_base_t base, int32_t id, vo
 
 static void wifi_manager_callback(int event_id) {
   switch (event_id) {
-  case SYSTEM_EVENT_STA_GOT_IP:
-    time_manager_sync_time(true);
-    weather_manager_init();
-    ota_manager_init();
-    break;
-  case SYSTEM_EVENT_STA_LOST_IP:
-  case SYSTEM_EVENT_STA_DISCONNECTED:
-    //TODO handle event. STOP tasks already started.
-    break;
+    case SYSTEM_EVENT_STA_GOT_IP:
+      time_manager_sync_time(true);
+      weather_manager_init();
+      ota_manager_init();
+      break;
+    case SYSTEM_EVENT_STA_LOST_IP:
+    case SYSTEM_EVENT_STA_DISCONNECTED:
+      weather_manager_deinit();
+      ota_manager_deinit();
+      break;
   }
 }
 

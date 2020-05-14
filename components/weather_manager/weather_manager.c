@@ -19,6 +19,8 @@ static char weather_data[MAX_HTTP_RECV_BUFFER];
 static char weather_description[20];
 static enum weather_icons weather_icon = UNKNOWN; 
 
+static TaskHandle_t weather_task_handler = NULL;
+
 static void weather_manager_parse_data();
 
 static esp_err_t _http_event_handler(esp_http_client_event_t *evt) {
@@ -139,7 +141,14 @@ static void update_weather_task(void *pvParameters) {
 }
 
 void weather_manager_init() {
-    xTaskCreate(&update_weather_task, "update_weather_task", 4096, NULL, 5, NULL);
+    xTaskCreate(&update_weather_task, "update_weather_task", 4096, NULL, 5, &weather_task_handler);
+}
+
+void weather_manager_deinit() {
+    if (weather_task_handler) {
+		vTaskDelete(weather_task_handler);
+		weather_task_handler = NULL;
+    }
 }
 
 char* weather_manager_get_weather_description() {

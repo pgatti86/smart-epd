@@ -3,4 +3,6 @@
 
 void ota_manager_init();
 
+void ota_manager_deinit();
+
 #endif

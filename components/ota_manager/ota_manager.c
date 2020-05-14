@@ -15,6 +15,8 @@ static const int UPDATE_CHECK_FREQ = 1000 * 60 * 60;
 
 static const int UPDATE_TIMEOUT = 1000 * 60;
 
+static TaskHandle_t ota_task_handler = NULL;
+
 static void ota_manager_check_fw_update();
 
 static esp_err_t ota_manager_validate_image_header(esp_app_desc_t *new_app_info);
@@ -28,7 +30,14 @@ void ota_manager_ota_task(void *pvParameter) {
 }
 
 void ota_manager_init() {
-    xTaskCreate(&ota_manager_ota_task, "ota_task", 1024*8, NULL, 5, NULL);
+    xTaskCreate(&ota_manager_ota_task, "ota_task", 1024*8, NULL, 5, &ota_task_handler);
+}
+
+void ota_manager_deinit() {
+    if (ota_task_handler) {
+		vTaskDelete(ota_task_handler);
+		ota_task_handler = NULL;
+    }
 }
 
 static esp_err_t ota_manager_validate_image_header(esp_app_desc_t *new_app_info) {
