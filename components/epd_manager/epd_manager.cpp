@@ -10,7 +10,7 @@
 #include "esp_log.h"
 #include "epd_images.h"
 #include "time_formatter.h"
-#include "clock_data.h"
+#include "clock_data_buffer.h"
 #include "strings.h"
 
 #include "epd_manager.h"
@@ -22,7 +22,8 @@ static const int SCREEN_HEIGHT = EPD_WIDTH;
 
 static int display_refresh_count = 0;
 
-static ClockData clockData;
+static ClockDataBuffer buffer1, buffer2;
+static ClockDataBuffer *currentBuffer = &buffer1;
 
 unsigned char image[EPD_WIDTH*EPD_HEIGHT/8];
 Paint paint(image, 0, 0);    // width should be the multiple of 8
@@ -202,37 +203,51 @@ void epd_manager_update(time_info_t *dst, float temperature, float humidity,
   }
 
   bool force_update = display_refresh_count < 2;
-  bool need_update = clockData.has_data_changed(dst, temperature, humidity, is_connected, weather_icon, weather_description);
 
+  bool is_weather_description_changed = strcmp(weather_description, currentBuffer->weather_description) != 0;
+  bool need_update = currentBuffer->is_connected != is_connected 
+                      || currentBuffer->day != dst->tm_yday
+                      || currentBuffer->minutes != dst->tm_min
+                      || (currentBuffer->temperature != temperature || currentBuffer->humidity != humidity)
+                      || (currentBuffer->weather_icon != weather_icon || is_weather_description_changed);
+  
+  ClockDataBuffer *previousBuffer = currentBuffer == &buffer1 ? &buffer2 : &buffer1;
+  
   if (force_update) {
+    ESP_LOGI(TAG, "Drawing grid and static images");
     epd_manager_draw_grid();
     epd_manager_draw_static_images();
-    ESP_LOGD(TAG, "Drawing grid and static images");
   }
 
-  if (force_update || (need_update && clockData.has_status_bar_changed(is_connected))) {
-    ESP_LOGD(TAG, "Drawing status bar");
+  if (force_update || (need_update && previousBuffer->is_connected != is_connected)) {
+    ESP_LOGI(TAG, "Drawing status bar");
     epd_manager_draw_status_bar(is_connected);
+    need_update = true;
   }
 
-  if (force_update || (need_update && clockData.has_date_changed(dst))) {
-    ESP_LOGD(TAG, "Drawing date");
+  if (force_update || (need_update && previousBuffer->day != dst->tm_yday)) {
+    ESP_LOGI(TAG, "Drawing date");
     epd_manager_draw_date(dst);
+    need_update = true;
   }
   
-  if (force_update || (need_update && clockData.has_time_changed(dst))) {
-    ESP_LOGD(TAG, "Drawing time");
+  if (force_update || (need_update && previousBuffer->minutes != dst->tm_min)) {
+    ESP_LOGI(TAG, "Drawing time");
     epd_manager_draw_time(dst); 
+    need_update = true;
   }
 
-  if (force_update || (need_update && clockData.has_dht_data_changed(temperature, humidity))) {
-    ESP_LOGD(TAG, "Drawing dht");
+  if (force_update || (need_update && (previousBuffer->temperature != temperature || previousBuffer->humidity != humidity))) {
+    ESP_LOGI(TAG, "Drawing dht");
     epd_manager_draw_dht_data(temperature, humidity);
+    need_update = true;
   } 
 
-  if (force_update || (need_update && clockData.has_weather_data_changed(weather_icon, weather_description))) {
+  bool is_previous_weather_description_changed = strcmp(weather_description, previousBuffer->weather_description) != 0;
+  if (force_update || (need_update && (previousBuffer->weather_icon != weather_icon || is_previous_weather_description_changed))) {
     ESP_LOGI(TAG, "Drawing weather");
     epd_manager_draw_weather(weather_icon, weather_description);
+    need_update = true;
   } 
 
   if (force_update || need_update) {
@@ -240,10 +255,16 @@ void epd_manager_update(time_info_t *dst, float temperature, float humidity,
 
     display_refresh_count = display_refresh_count == CONFIG_MAX_REWRITE_COUNT ? 
       0 : display_refresh_count + 1;
-  }
 
-  if (!force_update) {
-    clockData.update_data(dst, temperature, humidity, is_connected, weather_icon, weather_description);   
+    previousBuffer->is_connected = is_connected;
+    previousBuffer->day = dst->tm_yday;
+    previousBuffer->minutes = dst->tm_min;
+    previousBuffer->temperature = temperature;
+    previousBuffer->humidity = humidity;
+    strcpy(previousBuffer->weather_description, weather_description);
+    previousBuffer->weather_icon = weather_icon;
+    
+    currentBuffer = previousBuffer;  
   }
 }
 
