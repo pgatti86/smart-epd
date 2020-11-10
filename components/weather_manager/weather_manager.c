@@ -105,24 +105,30 @@ static void weather_manager_parse_data() {
 
 static void update_weather_task(void *pvParameters) {
    
-    while(1) {
+    char request[200];
+    int zip_code;
+    char *api_key;
+
+    esp_http_client_config_t config = {
+        .url = request,
+        .event_handler = _http_event_handler
+    };
+
+    esp_http_client_handle_t client;
+    esp_err_t err;
+
+    while (1) {
         
         weather_data_index = 0;
-        char request[200];
-        int zip_code = storage_manager_get_weather_zip_code();
-        char *api_key = storage_manager_get_weather_api_key();  
+        zip_code = storage_manager_get_weather_zip_code();
+        api_key = storage_manager_get_weather_api_key();  
         snprintf(request, 200, "https://api.openweathermap.org/data/2.5/weather?zip=%d,it&appid=%s&units=metric", 
             zip_code, api_key);
 
-        esp_http_client_config_t config = {
-            .url = request,
-            .event_handler = _http_event_handler
-        };
-
-        esp_http_client_handle_t client = esp_http_client_init(&config);
+        client = esp_http_client_init(&config);
 
         // GET
-        esp_err_t err = esp_http_client_perform(client);
+        err = esp_http_client_perform(client);
         if (err == ESP_OK) {
             ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %d",
                     esp_http_client_get_status_code(client),

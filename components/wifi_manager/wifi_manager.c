@@ -34,7 +34,7 @@ static bool is_sta_connected;
 
 void wifi_conn_retry_task(void *pvParameter) {
 
-	while(1) {
+	while (1) {
 
 		xEventGroupWaitBits(retry_event_group, WIFI_CONN_RETRY_BIT, false, true, portMAX_DELAY);
 

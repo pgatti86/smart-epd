@@ -84,17 +84,22 @@ void app_task(void *pvParameter) {
 
   time_info_t dst;
 
+  float t, h;
+  char *weather_description;
+  enum weather_icons weather_icon;
+  bool is_connected;
+
   while (1) {
 
     time_manager_get_current_date_time(&dst);
 
-    float t = dht_manager_getTemperature();
-    float h = dht_manager_getHumidity();
+    t = dht_manager_getTemperature();
+    h = dht_manager_getHumidity();
 
-    char *weather_description = weather_manager_get_weather_description();
-    enum weather_icons weather_icon = weather_manager_get_weather_icon();
+    weather_description = weather_manager_get_weather_description();
+    weather_icon = weather_manager_get_weather_icon();
 
-    bool is_connected = wifi_manager_is_sta_connected();
+    is_connected = wifi_manager_is_sta_connected();
 
     epd_manager_update(&dst, t, h, is_connected, weather_icon, weather_description);
 
