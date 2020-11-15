@@ -30,7 +30,7 @@ void gpio_event_handler(void *handler_arg, esp_event_base_t base, int32_t id, vo
 static void wifi_manager_callback(int event_id) {
   switch (event_id) {
     case SYSTEM_EVENT_STA_GOT_IP:
-      time_manager_sync_time(true);
+      time_manager_sync_time();
       weather_manager_init();
       ota_manager_init();
       break;
@@ -77,24 +77,26 @@ void app_task(void *pvParameter) {
   wifi_manager_connect(true);
 
   ESP_LOGI(TAG, "init dht_manager");
-  dht_manager_startReading();
+  dht_manager_start_update_task();
 
   ESP_LOGI(TAG, "init time_manager");
   time_manager_init();
 
   time_info_t dst;
-
   float t, h;
   char *weather_description;
   enum weather_icons weather_icon;
   bool is_connected;
-
+  //size_t mem;
+    
   while (1) {
+
+    //mem = heap_caps_get_free_size(MALLOC_CAP_8BIT); 
+    //ESP_LOGE(TAG, "Available mem: %d", mem);
 
     time_manager_get_current_date_time(&dst);
 
-    t = dht_manager_getTemperature();
-    h = dht_manager_getHumidity();
+    dht_manager_get_last_red_values(&t, &h);
 
     weather_description = weather_manager_get_weather_description();
     weather_icon = weather_manager_get_weather_icon();

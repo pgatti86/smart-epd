@@ -11,6 +11,8 @@
 
 #define MAX_HTTP_RECV_BUFFER 512
 
+#define WEATHER_TASK_DELAY 15 * 60 * 1000 
+
 static const char *TAG = "Weather-M";
 
 static int weather_data_index = 0;
@@ -104,30 +106,32 @@ static void weather_manager_parse_data() {
 }
 
 static void update_weather_task(void *pvParameters) {
-   
-    char request[200];
-    int zip_code;
-    char *api_key;
+    
+    int request_buffer_size = 200;
+    char request[request_buffer_size];
+    int zip_code = storage_manager_get_weather_zip_code();
+    char *api_key = storage_manager_get_weather_api_key();  
+
+    snprintf(request, request_buffer_size, 
+        "https://api.openweathermap.org/data/2.5/weather?zip=%d,it&appid=%s&units=metric", 
+        zip_code, api_key);
+
+    free(api_key); 
 
     esp_http_client_config_t config = {
         .url = request,
         .event_handler = _http_event_handler
     };
 
-    esp_http_client_handle_t client;
+    esp_http_client_handle_t client; 
+
     esp_err_t err;
 
     while (1) {
-        
+
         weather_data_index = 0;
-        zip_code = storage_manager_get_weather_zip_code();
-        api_key = storage_manager_get_weather_api_key();  
-        snprintf(request, 200, "https://api.openweathermap.org/data/2.5/weather?zip=%d,it&appid=%s&units=metric", 
-            zip_code, api_key);
 
         client = esp_http_client_init(&config);
-
-        // GET
         err = esp_http_client_perform(client);
         if (err == ESP_OK) {
             ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %d",
@@ -137,10 +141,9 @@ static void update_weather_task(void *pvParameters) {
             ESP_LOGE(TAG, "HTTP GET request failed: %s", esp_err_to_name(err));
         }
 
-        free(api_key); 
         esp_http_client_cleanup(client);
 
-        vTaskDelay(1000 * 60 * 15 / portTICK_RATE_MS);
+        vTaskDelay(WEATHER_TASK_DELAY / portTICK_RATE_MS);
    } 
 
    vTaskDelete(NULL);

@@ -49,7 +49,7 @@ void wifi_conn_retry_task(void *pvParameter) {
 }
 
 static void wifi_manager_print_connection_info() {
-	if(is_sta_connected){
+	if (is_sta_connected) {
 		tcpip_adapter_ip_info_t ip_info;
 		tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_STA, &ip_info);
 		ESP_LOGI(TAG, "Connected with following params:");
@@ -92,7 +92,7 @@ static esp_err_t event_handler(void *ctx, system_event_t *event) {
     			ESP_LOGI(TAG,"connection to the AP failed");
     			is_sta_connected = false;
 
-    			if(!conn_retry_task_handler && retry_connection) {
+    			if (!conn_retry_task_handler && retry_connection) {
     				xTaskCreate(&wifi_conn_retry_task, "retry_task", 2048, NULL, 5, &conn_retry_task_handler);
     				xEventGroupSetBits(retry_event_group, WIFI_CONN_RETRY_BIT);
     			}
@@ -102,7 +102,7 @@ static esp_err_t event_handler(void *ctx, system_event_t *event) {
     			break;
     }
 
-	if(event_callback) {
+	if (event_callback) {
 		event_callback(event-> event_id);
 	}
 

@@ -61,21 +61,23 @@ static void epd_manager_draw_paint(int x, int y) {
 }
 
 static void epd_manager_draw_grid() {
+
   int grid_height = 40;
   epd_manager_set_paint(SCREEN_WIDTH, SCREEN_HEIGHT, UNCOLORED);
   paint.DrawHorizontalLine(0, SCREEN_HEIGHT - grid_height, SCREEN_WIDTH, COLORED);
   paint.DrawVerticalLine(98, SCREEN_HEIGHT - grid_height, grid_height, COLORED);
   paint.DrawVerticalLine(196, SCREEN_HEIGHT - grid_height, grid_height, COLORED);
+
   epd_manager_draw_paint(0, 0);
 }
 
 static void epd_manager_draw_status_bar(bool is_connected) {
 
-  if(!is_connected) {
+  if (!is_connected) {
     epd.SetFrameMemory(NO_WIFI_IMAGE_DATA, SCREEN_HEIGHT - 16, SCREEN_WIDTH - 24, 16, 16);
   } else {
-      epd_manager_set_paint(16, 16, UNCOLORED);
-      epd_manager_draw_paint(SCREEN_WIDTH - 24, 0);
+    epd_manager_set_paint(16, 16, UNCOLORED);
+    epd_manager_draw_paint(SCREEN_WIDTH - 24, 0);
   }
 }
 
@@ -135,19 +137,7 @@ static void epd_manager_draw_weather(enum weather_icons weather_icon, char *desc
       break;
   }
 
-  epd.SetFrameMemory(icon, 72, 24, 48, 48);
-
-  int description_text_width = 120;
-  int description_length = strlen(description);
-
-  int description_padding = 35 - ((description_length / 2) * 7);
-  if (description_padding < 0){
-    description_padding = 0;
-  }
-
-  epd_manager_set_paint(description_text_width, 16, UNCOLORED);
-  paint.DrawStringAt(description_padding, 0, description, &Font12, COLORED);
-  epd_manager_draw_paint(8, 64);
+  epd.SetFrameMemory(icon, 56, 32, 48, 48);
 }
 
 static void epd_manager_draw_time(time_info_t *dst) {
@@ -158,6 +148,16 @@ static void epd_manager_draw_time(time_info_t *dst) {
   epd_manager_set_paint(175, 40, UNCOLORED);
   paint.DrawStringAt(0, 0, time_buffer, &Font40, COLORED);
   epd_manager_draw_paint(104, 24);
+}
+
+static void epd_manager_draw_timeline(time_info_t *dst) {
+
+  int timeline_height = 8;
+  int timeline_width = (SCREEN_WIDTH / 4) * ((dst->tm_sec / 15) + 1);
+  epd_manager_set_paint(SCREEN_WIDTH, timeline_height, UNCOLORED);
+  paint.DrawRectangle(0, 0, SCREEN_WIDTH, timeline_height, COLORED);
+  paint.DrawFilledRectangle(0, 0, timeline_width, timeline_height, COLORED);
+  epd_manager_draw_paint(0, 0);
 }
 
 static void epd_manager_draw_dht_data(float t, float h) {
@@ -203,13 +203,13 @@ void epd_manager_update(time_info_t *dst, float temperature, float humidity,
   }
 
   bool force_update = display_refresh_count < 2;
-
-  bool is_weather_description_changed = strcmp(weather_description, currentBuffer->weather_description) != 0;
+  bool update_timeline = (dst->tm_sec % 15) == 0;
   bool need_update = currentBuffer->is_connected != is_connected 
                       || currentBuffer->day != dst->tm_yday
                       || currentBuffer->minutes != dst->tm_min
+                      || update_timeline
                       || (currentBuffer->temperature != temperature || currentBuffer->humidity != humidity)
-                      || (currentBuffer->weather_icon != weather_icon || is_weather_description_changed);
+                      || (currentBuffer->weather_icon != weather_icon);
   
   ClockDataBuffer *previousBuffer = currentBuffer == &buffer1 ? &buffer2 : &buffer1;
   
@@ -222,32 +222,31 @@ void epd_manager_update(time_info_t *dst, float temperature, float humidity,
   if (force_update || (need_update && previousBuffer->is_connected != is_connected)) {
     ESP_LOGI(TAG, "Drawing status bar");
     epd_manager_draw_status_bar(is_connected);
-    need_update = true;
   }
+
+  if (force_update || (need_update && previousBuffer->weather_icon != weather_icon)) {
+    ESP_LOGI(TAG, "Drawing weather");
+    epd_manager_draw_weather(weather_icon, weather_description);
+  } 
 
   if (force_update || (need_update && previousBuffer->day != dst->tm_yday)) {
     ESP_LOGI(TAG, "Drawing date");
     epd_manager_draw_date(dst);
-    need_update = true;
   }
-  
+
   if (force_update || (need_update && previousBuffer->minutes != dst->tm_min)) {
     ESP_LOGI(TAG, "Drawing time");
     epd_manager_draw_time(dst); 
-    need_update = true;
   }
 
+  if (force_update || need_update) {
+    ESP_LOGI(TAG, "Drawing timeline");
+    epd_manager_draw_timeline(dst);
+  }
+  
   if (force_update || (need_update && (previousBuffer->temperature != temperature || previousBuffer->humidity != humidity))) {
     ESP_LOGI(TAG, "Drawing dht");
     epd_manager_draw_dht_data(temperature, humidity);
-    need_update = true;
-  } 
-
-  bool is_previous_weather_description_changed = strcmp(weather_description, previousBuffer->weather_description) != 0;
-  if (force_update || (need_update && (previousBuffer->weather_icon != weather_icon || is_previous_weather_description_changed))) {
-    ESP_LOGI(TAG, "Drawing weather");
-    epd_manager_draw_weather(weather_icon, weather_description);
-    need_update = true;
   } 
 
   if (force_update || need_update) {
@@ -256,6 +255,7 @@ void epd_manager_update(time_info_t *dst, float temperature, float humidity,
     display_refresh_count = display_refresh_count == CONFIG_MAX_REWRITE_COUNT ? 
       0 : display_refresh_count + 1;
 
+    
     previousBuffer->is_connected = is_connected;
     previousBuffer->day = dst->tm_yday;
     previousBuffer->minutes = dst->tm_min;

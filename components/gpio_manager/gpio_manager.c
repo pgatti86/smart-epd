@@ -25,19 +25,20 @@ static void gpio_isr_task() {
 
     uint32_t io_num;
     uint64_t last_btn_pressed_time = 0;
+    uint64_t current = 0;
     
     for(;;) {
         if(xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY)) {
             
-            uint64_t current = getTimeSinceStart();
+            current = getTimeSinceStart();
 
             if ((current - last_btn_pressed_time) > DEBOUNCE_TIME) {
             
-                while(!gpio_get_level(io_num)) {
+                while (!gpio_get_level(io_num)) {
                     vTaskDelay(200 / portTICK_RATE_MS);
                 }
 
-                if(getTimeSinceStart() - current >= LONG_CLICK_THRESHOLD) {
+                if (getTimeSinceStart() - current >= LONG_CLICK_THRESHOLD) {
                     esp_event_post(GPIO_EVENTS, GPIO_RESET_EVENT, NULL, 0, portMAX_DELAY);
                 } else {
                     esp_event_post(GPIO_EVENTS, GPIO_CLICK_EVENT, NULL, 0, portMAX_DELAY);

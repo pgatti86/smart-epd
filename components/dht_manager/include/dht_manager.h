@@ -1,22 +1,88 @@
-/* 
+/**
+ * @file dht_manager.h
+ * @defgroup dht_manager dht_manager
+ * @{
+ *
+ * ESP-IDF driver for DHT11, AM2301 (DHT21, DHT22, AM2302, AM2321), Itead Si7021
+ *
+ * Ported from esp-open-rtos
+ *
+ * Copyright (C) 2016 Jonathan Hartsuiker <https://github.com/jsuiker>\n
+ * Copyright (C) 2018 Ruslan V. Uss <https://github.com/UncleRus>\n
+ *
+ * BSD Licensed as described in the file LICENSE
+ *
+ * @note A suitable pull-up resistor should be connected to the selected GPIO line
+ *
+ */
+#ifndef __DHT_H__
+#define __DHT_H__
 
-	DHT22 temperature sensor driver
+#include <driver/gpio.h>
+#include <esp_err.h>
 
-*/
-
-#ifndef DHT22_H_  
-#define DHT22_H_
-
-#define DHT_OK 0
-#define DHT_CHECKSUM_ERROR -1
-#define DHT_TIMEOUT_ERROR -2
-
-// == function prototypes =======================================
-
-void 	dht_manager_setDhtGpio(int gpio);
-void 	dht_manager_startReading();
-void 	dht_manager_stopReading();
-float 	dht_manager_getHumidity();
-float 	dht_manager_getTemperature();
-
+#ifdef __cplusplus
+extern "C" {
 #endif
+
+/**
+ * Sensor type
+ */
+typedef enum
+{
+    DHT_TYPE_DHT11 = 0,   //!< DHT11
+    DHT_TYPE_AM2301,      //!< AM2301 (DHT21, DHT22, AM2302, AM2321)
+    DHT_TYPE_SI7021       //!< Itead Si7021
+} dht_sensor_type_t;
+
+/**
+ * @brief Read data from sensor on specified pin.
+ * Humidity and temperature are returned as integers.
+ * For example: humidity=625 is 62.5 %
+ *              temperature=24.4 is 24.4 degrees Celsius
+ *
+ * @param[in] sensor_type DHT11 or DHT22
+ * @param[in] pin GPIO pin connected to sensor OUT
+ * @param[out] humidity Humidity, percents * 10
+ * @param[out] temperature Temperature, degrees Celsius * 10
+ * @return `ESP_OK` on success
+ */
+esp_err_t dht_manager_read_data(dht_sensor_type_t sensor_type, gpio_num_t pin,
+        int16_t *humidity, int16_t *temperature);
+
+/**
+ * @brief Read data from sensor on specified pin.
+ * Humidity and temperature are returned as floats.
+ *
+ * @param[in] sensor_type DHT11 or DHT22
+ * @param[in] pin GPIO pin connected to sensor OUT
+ * @param[out] humidity Humidity, percents
+ * @param[out] temperature Temperature, degrees Celsius
+ * @return `ESP_OK` on success
+ */
+esp_err_t dht_manager_read_float_data(dht_sensor_type_t sensor_type, gpio_num_t pin,
+        float *humidity, float *temperature);
+
+/**
+ * Start dht low priority task to update internal values.
+ * You can get those internal values with #dht_get_last_red_values method
+ */
+void dht_manager_start_update_task();
+
+/**
+ * Stop dht internal task.
+ */
+void dht_manager_stop_update_task();
+
+/**
+ * Get last red available values
+ */
+void dht_manager_get_last_red_values(float *temperature, float *humidity);
+
+#ifdef __cplusplus
+}
+#endif
+
+/**@}*/
+
+#endif  // __DHT_H__

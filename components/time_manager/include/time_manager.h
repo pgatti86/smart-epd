@@ -8,19 +8,14 @@
 #ifndef COMPONENTS_TIME_MANAGER_INCLUDE_TIME_MANAGER_H_
 #define COMPONENTS_TIME_MANAGER_INCLUDE_TIME_MANAGER_H_
 
-#include "esp_sntp.h"
 #include <stdbool.h>
 #include "time_info.h"
 
 void time_manager_init();
 
-void time_manager_sync_time(bool async);
+void time_manager_sync_time();
 
-bool time_manager_is_time_synched();
-
-void time_manager_format_current_date(char *dst);
-
-void time_manager_format_current_time(char *dst);
+bool time_manager_is_time_set();
 
 void time_manager_get_current_date_time(time_info_t *dst);
 

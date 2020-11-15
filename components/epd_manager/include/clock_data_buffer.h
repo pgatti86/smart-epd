@@ -9,7 +9,7 @@
 class ClockDataBuffer {
 
     public:
-
+    
         int minutes = -1;
         
         int day = -1;
