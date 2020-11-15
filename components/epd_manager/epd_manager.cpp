@@ -144,7 +144,6 @@ static void epd_manager_draw_time(time_info_t *dst) {
 
   char time_buffer [20];
   time_formatter_format_current_time(dst, time_buffer);
-    
   epd_manager_set_paint(175, 40, UNCOLORED);
   paint.DrawStringAt(0, 0, time_buffer, &Font40, COLORED);
   epd_manager_draw_paint(104, 24);
@@ -155,8 +154,8 @@ static void epd_manager_draw_timeline(time_info_t *dst) {
   int timeline_height = 8;
   int timeline_width = (SCREEN_WIDTH / 4) * ((dst->tm_sec / 15) + 1);
   epd_manager_set_paint(SCREEN_WIDTH, timeline_height, UNCOLORED);
-  paint.DrawRectangle(0, 0, SCREEN_WIDTH, timeline_height, COLORED);
-  paint.DrawFilledRectangle(0, 0, timeline_width, timeline_height, COLORED);
+  paint.DrawHorizontalLine(timeline_width, timeline_height / 2, SCREEN_WIDTH, COLORED);
+  paint.DrawFilledRectangle(0, 0, timeline_width, timeline_height / 2, COLORED);
   epd_manager_draw_paint(0, 0);
 }
 
