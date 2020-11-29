@@ -11,6 +11,7 @@ The final scope is to build an alarm clock with some added features like tempera
 - Any [esp32](https://live.staticflickr.com/4764/40089095211_ec1fee0087_b.jpg) breakout board (with at least 4MB flash size)
 - [Waveshare 2.9inch E-paper Module b/w](https://www.waveshare.com/wiki/2.9inch_e-Paper_Module) (296x128 px)
 - [DHT22 temperature and humidity module](https://imgaz.staticbg.com/thumb/large/2014/xiemeijuan/07/SKU146979/SKU146979a.jpg)
+- [APDS-9960 module](https://learn.sparkfun.com/tutorials/apds-9960-rgb-and-gesture-sensor-hookup-guide/all)
 - USB-A to micro USB-B cable
 
 Depending on the store from which you buy the material, the price can vary between 30€ and 50€
@@ -27,11 +28,13 @@ To solve simply remove the invalid option (--no-site-packages) from idf_tools.py
 
 To clone this project use **git clone --recursive git@gitlab.com:paolo.gatti/smart-epd.git** 
 
-This repo depends on epd [library](https://github.com/pgatti86/epd) as git submodule.
+This repo depends on a couple of libraries as git submodules:
+- epd [library](https://github.com/pgatti86/epd) 
+- apds9960 [library](https://github.com/pgatti86/apds9960-idf)
 
 Project Makefile has the following configuration to include the submodule library in the build process:
 
-**EXTRA_COMPONENT_DIRS += $(PROJECT_PATH)/epd/components/**
+**EXTRA_COMPONENT_DIRS += $(PROJECT_PATH)/epd/components/ $(PROJECT_PATH)/apds9960-idf/components/**
 
 ## Configurations
 
@@ -45,7 +48,9 @@ Enter SMART-EPD config menu to configure the application (some defaults values a
 - OTA_SERVER: https server that hosts your generated bin file. 
 - DHT_GPIO: reads temperature and humidity from DHT22 on specified GPIO. Defauts to GPIO 4
 - BUTTON_GPIO: wipes the device memory when holded longer then 3s. Defaults to 0 (builtin button)
-- MAX_REWRITE_COUNT: number of screen rewrite before eink full clean apply. Defualts to once in an hour
+- MAX_REWRITE_COUNT: number of screen rewrite before eink full clean apply. Defualts to 3600
+- SCL: i2c scl pin. Defaults to 22
+- SDA: i2c sda pin. Defaults to 23
 
 Save and return to the main menu.
 
