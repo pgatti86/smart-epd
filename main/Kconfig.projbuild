@@ -17,6 +17,14 @@ config BUTTON_GPIO
     range 0 34
     default 0    
 
+config SCL
+    int "I2C SCL GPIO"
+    default 22
+
+config SDA
+    int "I2C SDA GPIO"
+    default 23
+
 config MAX_REWRITE_COUNT
     int "Max number of screen rewrite before full clean"
     default 3600

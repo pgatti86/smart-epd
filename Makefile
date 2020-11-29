@@ -4,7 +4,7 @@
 #
 
 PROJECT_NAME := smart-epd
-EXTRA_COMPONENT_DIRS += $(PROJECT_PATH)/epd/components/
+EXTRA_COMPONENT_DIRS += $(PROJECT_PATH)/epd/components/ $(PROJECT_PATH)/apds9960-idf/components/
 
 include $(IDF_PATH)/make/project.mk
 

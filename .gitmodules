@@ -1,3 +1,6 @@
 [submodule "epd"]
 	path = epd
 	url = https://github.com/pgatti86/epd.git
+[submodule "apds9960-idf"]
+	path = apds9960-idf
+	url = https://github.com/pgatti86/apds9960-idf.git
