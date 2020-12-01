@@ -23,7 +23,11 @@ config SCL
 
 config SDA
     int "I2C SDA GPIO"
-    default 23
+    default 21
+
+config APDS_INT
+    int "APDS INTERRUPT GPIO"
+    default 19    
 
 config MAX_REWRITE_COUNT
     int "Max number of screen rewrite before full clean"

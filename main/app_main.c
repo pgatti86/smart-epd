@@ -8,6 +8,7 @@
 #include "enrollment_manager.h"
 #include "time_manager.h"
 #include "epd_manager.h"
+#include "apds_manager.h"
 #include "dht_manager.h"
 #include "gpio_manager.h"
 #include "storage_manager.h"
@@ -81,6 +82,9 @@ void app_task(void *pvParameter) {
 
   ESP_LOGI(TAG, "init time_manager");
   time_manager_init();
+
+  ESP_LOGI(TAG, "init apds");
+  apds_manager_init();
 
   time_info_t dst;
   float t, h;

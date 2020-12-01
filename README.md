@@ -20,11 +20,13 @@ DHT22 requires a pullup resistor. I recommend buying a module that integrates re
 
 ## Getting Started
 
-This project is based on Espressif IDF v4.0 (current stable branch).
+This project is based on Espressif IDF v4.0 (stable branch at writing time).
 Follow this link to configure your environment: [esp idf v4.0](https://docs.espressif.com/projects/esp-idf/en/v4.0/get-started/index.html)
 
 Note: depending on your python virtualenv version you may encounter an error while running ESP install script (install.sh).
 To solve simply remove the invalid option (--no-site-packages) from idf_tools.py 
+
+However the project is compatible with more updated versions of the framework such as IDF 4.1
 
 To clone this project use **git clone --recursive git@gitlab.com:paolo.gatti/smart-epd.git** 
 
@@ -50,7 +52,8 @@ Enter SMART-EPD config menu to configure the application (some defaults values a
 - BUTTON_GPIO: wipes the device memory when holded longer then 3s. Defaults to 0 (builtin button)
 - MAX_REWRITE_COUNT: number of screen rewrite before eink full clean apply. Defualts to 3600
 - SCL: i2c scl pin. Defaults to 22
-- SDA: i2c sda pin. Defaults to 23
+- SDA: i2c sda pin. Defaults to 21
+- APDS_INT: Apds9969 interrupt GPIO. Defaults to 19
 
 Save and return to the main menu.
 
