@@ -13,54 +13,14 @@
 #include "clock_data_buffer.h"
 #include "strings.h"
 
-#include "epd_manager.h"
+#include "clock_page.h"
 
 static const char *TAG = "EPD MANAGER";
-
-static const int SCREEN_WIDTH = EPD_HEIGHT;
-static const int SCREEN_HEIGHT = EPD_WIDTH;
-
-static int display_refresh_count = 0;
 
 static ClockDataBuffer buffer1, buffer2;
 static ClockDataBuffer *currentBuffer = &buffer1;
 
-unsigned char image[EPD_WIDTH*EPD_HEIGHT/8];
-Paint paint(image, 0, 0);    // width should be the multiple of 8
-Epd epd;
-
-static void epd_manager_clear() {
-
-  ESP_LOGI(TAG, "Clearing display...");
-  epd.ClearFrameMemory(0xFF);   // bit set = white, bit reset = black
-  epd.DisplayFrame();
-
-  epd.ClearFrameMemory(0xFF);   // bit set = white, bit reset = black
-  epd.DisplayFrame();
-}
-
-static void epd_manager_full_clear() {
-  
-  epd.Init(lut_full_update);
-  epd_manager_clear(); 
-  epd.Init(lut_partial_update);
-}
-
-static void epd_manager_set_paint(int width, int height, int clear_color) {
-  
-  paint.Clear(clear_color);
-  paint.SetWidth(height);
-  paint.SetHeight(width);
-}
-
-static void epd_manager_draw_paint(int x, int y) {
-  
-  int x_abs_coord = EPD_WIDTH - paint.GetWidth() - y;
-  int y_abs_coord = x;
-  epd.SetFrameMemory(paint.GetImage(), x_abs_coord , y_abs_coord, paint.GetWidth(), paint.GetHeight());
-}
-
-static void epd_manager_draw_grid() {
+void epd_manager_draw_grid() {
 
   int grid_height = 40;
   epd_manager_set_paint(SCREEN_WIDTH, SCREEN_HEIGHT, UNCOLORED);
@@ -71,7 +31,7 @@ static void epd_manager_draw_grid() {
   epd_manager_draw_paint(0, 0);
 }
 
-static void epd_manager_draw_status_bar(bool is_connected) {
+void epd_manager_draw_status_bar(bool is_connected) {
 
   if (!is_connected) {
     epd.SetFrameMemory(NO_WIFI_IMAGE_DATA, SCREEN_HEIGHT - 16, SCREEN_WIDTH - 24, 16, 16);
@@ -81,7 +41,7 @@ static void epd_manager_draw_status_bar(bool is_connected) {
   }
 }
 
-static void epd_manager_draw_date(time_info_t *dst) {
+void epd_manager_draw_date(time_info_t *dst) {
   
   char day_buffer [10];
   time_formatter_format_current_day(dst, day_buffer);
@@ -97,7 +57,7 @@ static void epd_manager_draw_date(time_info_t *dst) {
   epd_manager_draw_paint(0, SCREEN_HEIGHT - paint_height);
 }
 
-static void epd_manager_draw_weather(enum weather_icons weather_icon, char *description) {
+void epd_manager_draw_weather(enum weather_icons weather_icon, char *description) {
   
   const unsigned char *icon;
 
@@ -140,7 +100,7 @@ static void epd_manager_draw_weather(enum weather_icons weather_icon, char *desc
   epd.SetFrameMemory(icon, 56, 32, 48, 48);
 }
 
-static void epd_manager_draw_time(time_info_t *dst) {
+void epd_manager_draw_time(time_info_t *dst) {
 
   char time_buffer [20];
   time_formatter_format_current_time(dst, time_buffer);
@@ -149,7 +109,7 @@ static void epd_manager_draw_time(time_info_t *dst) {
   epd_manager_draw_paint(104, 24);
 }
 
-static void epd_manager_draw_timeline(time_info_t *dst) {
+void epd_manager_draw_timeline(time_info_t *dst) {
 
   int timeline_height = 8;
   int timeline_width = (SCREEN_WIDTH / 4) * ((dst->tm_sec / 15) + 1);
@@ -159,7 +119,7 @@ static void epd_manager_draw_timeline(time_info_t *dst) {
   epd_manager_draw_paint(0, 0);
 }
 
-static void epd_manager_draw_dht_data(float t, float h) {
+void epd_manager_draw_dht_data(float t, float h) {
 
   char temp_buffer [5];
   sprintf(temp_buffer, "%.1fC", t); 
@@ -174,32 +134,13 @@ static void epd_manager_draw_dht_data(float t, float h) {
   epd_manager_draw_paint(232, SCREEN_HEIGHT - paint.GetWidth());
 }
 
-static void epd_manager_draw_static_images() {
+void epd_manager_draw_static_images() {
   epd.SetFrameMemory(TEMP_IMAGE_DATA, 8, 104, 24, 24);
   epd.SetFrameMemory(DROP_IMAGE_DATA, 8, 204, 24, 24);
 }
 
-void epd_manager_init() {
-
-  if (epd.Init(lut_partial_update) != 0) {
-    ESP_LOGE(TAG, "e-Paper init failed");
-    return;
-  }
-
-  ESP_LOGI(TAG, "e-Paper initialized");
-
-  epd_manager_clear();
-  paint.SetWidth(EPD_WIDTH);
-  paint.SetHeight(EPD_HEIGHT);
-  paint.SetRotate(ROTATE_90);
-}
-
 void epd_manager_update(time_info_t *dst, float temperature, float humidity, 
-    bool is_connected, enum weather_icons weather_icon, char* weather_description) {
-
-  if (display_refresh_count == 0) {
-    epd_manager_full_clear();
-  }
+  bool is_connected, enum weather_icons weather_icon, char* weather_description) {
 
   bool force_update = display_refresh_count < 2;
   bool update_timeline = (dst->tm_sec % 15) == 0;
@@ -251,10 +192,6 @@ void epd_manager_update(time_info_t *dst, float temperature, float humidity,
   if (force_update || need_update) {
     epd.DisplayFrame();
 
-    display_refresh_count = display_refresh_count == CONFIG_MAX_REWRITE_COUNT ? 
-      0 : display_refresh_count + 1;
-
-    
     previousBuffer->is_connected = is_connected;
     previousBuffer->day = dst->tm_yday;
     previousBuffer->minutes = dst->tm_min;
