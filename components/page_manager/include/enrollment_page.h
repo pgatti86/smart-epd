@@ -11,7 +11,7 @@ class EnrollmentPage: public EInkPage {
 
     public:
 
-        EnrollmentPage(Epd *epd, Paint *paint) : EInkPage { epd, paint} {}
+        EnrollmentPage(Epd *epd, Paint *paint) : EInkPage {epd, paint} {}
         ~EnrollmentPage() {}
 
         bool draw() {

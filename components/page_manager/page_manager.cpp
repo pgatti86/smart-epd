@@ -2,6 +2,7 @@
 #include "epdpaint.h"
 #include "esp_log.h"
 #include "enrollment_page.h"
+#include "clock_page.h"
 
 extern "C" {
     #include "storage_manager.h"
@@ -52,17 +53,21 @@ static void page_manager_update_page() {
 static void update_pages_task(void *args) {
 
   if (!storage_manager_has_enrollment_done()) {
-    
-  } 
-  
-  currentPage = new EnrollmentPage(&epd, &paint);
+    currentPage = new EnrollmentPage(&epd, &paint);    
+  } else {
+    currentPage = new ClockPage(&epd, &paint);
+  }
 
+  size_t mem;
   while (1) {
     page_manager_update_page();
+    mem = heap_caps_get_free_size(MALLOC_CAP_8BIT); 
+    ESP_LOGE(TAG, "Available mem: %d", mem);
     vTaskDelay(1000 / portTICK_RATE_MS);
   }
 }
 
+//TODO listen for gesture sensor
 void page_manager_init() {
 
   if (epd.Init(lut_partial_update) != 0) {
@@ -76,6 +81,4 @@ void page_manager_init() {
   paint.SetRotate(ROTATE_90);
   
   xTaskCreate(&update_pages_task, "update_pages_task", 4096, NULL, 5, NULL); 
-
-  //TODO listen for gesture sensor
 }

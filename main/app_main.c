@@ -1,6 +1,4 @@
 #include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "nvs_flash.h"
 #include "esp_wifi.h"
 #include "esp_log.h"
 #include "page_manager.h"
@@ -52,50 +50,6 @@ static void enrollment_manager_callback(int event_id) {
   }
 }
 
-// TODO remove task
-void app_task(void *pvParameter) {
-
-  ESP_LOGI(TAG, "init wifi_manager");
-  wifi_manager_sta_init();
-  wifi_manager_set_callback(wifi_manager_callback);
-  wifi_manager_connect(true);
-
-  ESP_LOGI(TAG, "init dht_manager");
-  dht_manager_start_update_task();
-
-  ESP_LOGI(TAG, "init time_manager");
-  time_manager_init();
-
-  ESP_LOGI(TAG, "init apds");
-  apds_manager_init();
-
-  time_info_t dst;
-  float t, h;
-  char *weather_description;
-  enum weather_icons weather_icon;
-  bool is_connected;
-  //size_t mem;
-    
-  while (1) {
-
-    //mem = heap_caps_get_free_size(MALLOC_CAP_8BIT); 
-    //ESP_LOGE(TAG, "Available mem: %d", mem);
-
-    time_manager_get_current_date_time(&dst);
-
-    dht_manager_get_last_red_values(&t, &h);
-
-    weather_description = weather_manager_get_weather_description();
-    weather_icon = weather_manager_get_weather_icon();
-
-    is_connected = wifi_manager_is_sta_connected();
-
-    //epd_manager_update(&dst, t, h, is_connected, weather_icon, weather_description);
-
-    vTaskDelay(1000 / portTICK_RATE_MS);
-  }
-}
-
 void app_main() {
 
   ESP_LOGI(TAG, "[APP] Startup..");
@@ -112,7 +66,23 @@ void app_main() {
 
   storage_manager_init();
   if (!storage_manager_has_enrollment_done()) {
+
     enrollment_manager_init(enrollment_manager_callback);
+  } else {
+    
+    ESP_LOGI(TAG, "init wifi_manager");
+    wifi_manager_sta_init();
+    wifi_manager_set_callback(wifi_manager_callback);
+    wifi_manager_connect(true);
+
+    ESP_LOGI(TAG, "init dht_manager");
+    dht_manager_start_update_task();
+
+    ESP_LOGI(TAG, "init time_manager");
+    time_manager_init();
+
+    ESP_LOGI(TAG, "init apds");
+    apds_manager_init();
   }
 
   ESP_LOGI(TAG, "init page_manager");
