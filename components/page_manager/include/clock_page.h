@@ -23,19 +23,19 @@ class ClockPage: public EInkPage {
         ~ClockPage() {}
 
         bool draw() {
-            return epd_manager_update();
+            return clock_page_update();
         }
 
     private:
 
         static constexpr char *TAG = "Clock Page";
 
-        long update_count = 0;
+        unsigned long update_count = 0;
 
         ClockDataBuffer buffer1, buffer2;
         ClockDataBuffer *currentBuffer = &buffer1;
 
-        void epd_manager_draw_grid() {
+        void clock_page_draw_grid() {
         
             Paint *paint = getPaint();
 
@@ -48,7 +48,7 @@ class ClockPage: public EInkPage {
             eink_page_draw_paint(0, 0);
         }
 
-        void epd_manager_draw_status_bar(bool is_connected) {
+        void clock_page_draw_status_bar(bool is_connected) {
             
             Epd *epd = getEpd();
 
@@ -60,7 +60,7 @@ class ClockPage: public EInkPage {
             }
         }
 
-        void epd_manager_draw_date(time_info_t *dst) {
+        void clock_page_draw_date(time_info_t *dst) {
 
             Paint *paint = getPaint();
   
@@ -78,7 +78,7 @@ class ClockPage: public EInkPage {
             eink_page_draw_paint(0, SCREEN_HEIGHT - paint_height);
         }
 
-        void epd_manager_draw_weather(enum weather_icons weather_icon) {
+        void clock_page_draw_weather(enum weather_icons weather_icon) {
   
             const unsigned char *icon;
 
@@ -122,7 +122,7 @@ class ClockPage: public EInkPage {
             epd->SetFrameMemory(icon, 56, 32, 48, 48);
         }
 
-        void epd_manager_draw_time(time_info_t *dst) {
+        void clock_page_draw_time(time_info_t *dst) {
             
             Paint *paint = getPaint();
 
@@ -133,7 +133,7 @@ class ClockPage: public EInkPage {
             eink_page_draw_paint(104, 24);
         }
 
-        void epd_manager_draw_timeline(time_info_t *dst) {
+        void clock_page_draw_timeline(time_info_t *dst) {
             
             Paint *paint = getPaint();
 
@@ -145,7 +145,7 @@ class ClockPage: public EInkPage {
             eink_page_draw_paint(0, 0);
         }
 
-        void epd_manager_draw_dht_data(float t, float h) {
+        void clock_page_draw_dht_data(float t, float h) {
 
             Paint *paint = getPaint();
 
@@ -162,14 +162,14 @@ class ClockPage: public EInkPage {
             eink_page_draw_paint(232, SCREEN_HEIGHT - paint->GetWidth());
         }
 
-        void epd_manager_draw_static_images() {
+        void clock_page_draw_static_images() {
             
             Epd *epd = getEpd();
             epd->SetFrameMemory(TEMP_IMAGE_DATA, 8, 104, 24, 24);
             epd->SetFrameMemory(DROP_IMAGE_DATA, 8, 204, 24, 24);
         }
 
-        bool epd_manager_update() {
+        bool clock_page_update() {
 
             time_info_t dst;
             time_manager_get_current_date_time(&dst);
@@ -194,38 +194,38 @@ class ClockPage: public EInkPage {
             
             if (force_update) {
                 ESP_LOGI(TAG, "Drawing grid and static images");
-                epd_manager_draw_grid();
-                epd_manager_draw_static_images();
+                clock_page_draw_grid();
+                clock_page_draw_static_images();
             }
 
             if (force_update || (need_update && previousBuffer->is_connected != is_connected)) {
                 ESP_LOGI(TAG, "Drawing status bar");
-                epd_manager_draw_status_bar(is_connected);
+                clock_page_draw_status_bar(is_connected);
             }
 
             if (force_update || (need_update && previousBuffer->weather_icon != weather_icon)) {
                 ESP_LOGI(TAG, "Drawing weather");
-                epd_manager_draw_weather(weather_icon);
+                clock_page_draw_weather(weather_icon);
             } 
 
             if (force_update || (need_update && previousBuffer->day != dst.tm_yday)) {
                 ESP_LOGI(TAG, "Drawing date");
-                epd_manager_draw_date(&dst);
+                clock_page_draw_date(&dst);
             }
 
             if (force_update || (need_update && previousBuffer->minutes != dst.tm_min)) {
                 ESP_LOGI(TAG, "Drawing time");
-                epd_manager_draw_time(&dst); 
+                clock_page_draw_time(&dst); 
             }
 
             if (force_update || need_update) {
                 ESP_LOGI(TAG, "Drawing timeline");
-                epd_manager_draw_timeline(&dst);
+                clock_page_draw_timeline(&dst);
             }
             
             if (force_update || (need_update && (previousBuffer->temperature != t || previousBuffer->humidity != h))) {
                 ESP_LOGI(TAG, "Drawing dht");
-                epd_manager_draw_dht_data(t, h);
+                clock_page_draw_dht_data(t, h);
             } 
 
             bool must_update = force_update || need_update;

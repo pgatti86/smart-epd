@@ -5,7 +5,14 @@
 extern "C" {
 #endif
 
-    void page_manager_init();	
+    const int epd_page_count = 3;
+    enum EpdPage {                                     
+    	PAGE_SPLASH,
+        PAGE_ENROLLMENT,
+    	PAGE_CLOCK
+	};
+
+    void page_manager_init();
 
 #ifdef __cplusplus
 }

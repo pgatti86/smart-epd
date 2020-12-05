@@ -15,7 +15,7 @@ class EInkPage {
             r_paint = paint;
         }
 
-        ~EInkPage() {}
+        virtual ~EInkPage() {}
     
         virtual bool draw() = 0;
 

@@ -18,7 +18,7 @@ class EnrollmentPage: public EInkPage {
 
             if (!has_drew_page) {
                 has_drew_page= true;
-                epd_manager_show_enrollment();
+                enrollment_page_show_enrollment();
                 return true;
             }    
 
@@ -31,7 +31,7 @@ class EnrollmentPage: public EInkPage {
         
         bool has_drew_page = false;
         
-        void epd_manager_show_enrollment() {
+        void enrollment_page_show_enrollment() {
 
             eink_page_set_paint(SCREEN_WIDTH, SCREEN_HEIGHT, UNCOLORED);
 
