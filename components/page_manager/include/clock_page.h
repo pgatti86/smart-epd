@@ -177,8 +177,7 @@ class ClockPage: public EInkPage {
             float t, h;
             dht_manager_get_last_red_values(&t, &h);
 
-            char *weather_description = weather_manager_get_weather_description();
-            enum weather_icons weather_icon = weather_manager_get_weather_icon();
+            struct weather_data *w_data = weather_manager_get_weather_data();
             bool is_connected = wifi_manager_is_sta_connected();
 
             bool force_update = update_count < 2;
@@ -188,7 +187,7 @@ class ClockPage: public EInkPage {
                                 || currentBuffer->minutes != dst.tm_min
                                 || update_timeline
                                 || (currentBuffer->temperature != t || currentBuffer->humidity != h)
-                                || (currentBuffer->weather_icon != weather_icon);
+                                || (currentBuffer->weather_icon != w_data->weather_icon);
             
             ClockDataBuffer *previousBuffer = currentBuffer == &buffer1 ? &buffer2 : &buffer1;
             
@@ -203,9 +202,9 @@ class ClockPage: public EInkPage {
                 clock_page_draw_status_bar(is_connected);
             }
 
-            if (force_update || (need_update && previousBuffer->weather_icon != weather_icon)) {
+            if (force_update || (need_update && previousBuffer->weather_icon != w_data->weather_icon)) {
                 ESP_LOGI(TAG, "Drawing weather");
-                clock_page_draw_weather(weather_icon);
+                clock_page_draw_weather(w_data->weather_icon);
             } 
 
             if (force_update || (need_update && previousBuffer->day != dst.tm_yday)) {
@@ -242,8 +241,8 @@ class ClockPage: public EInkPage {
                 previousBuffer->minutes = dst.tm_min;
                 previousBuffer->temperature = t;
                 previousBuffer->humidity = h;
-                strcpy(previousBuffer->weather_description, weather_description);
-                previousBuffer->weather_icon = weather_icon;
+                strcpy(previousBuffer->weather_description, w_data->weather_description);
+                previousBuffer->weather_icon = w_data->weather_icon;
                 
                 currentBuffer = previousBuffer;  
             }

@@ -5,6 +5,7 @@
 #include "splash_page.h"
 #include "enrollment_page.h"
 #include "clock_page.h"
+#include "weather_page.h"
 
 extern "C" {
     #include "storage_manager.h"
@@ -66,6 +67,9 @@ static void page_manager_prepare_page(enum EpdPage page_value) {
     case PAGE_ENROLLMENT:
       einkPageRef = new EnrollmentPage(&epd, &paint);
       break;
+    case PAGE_WEATHER:
+      einkPageRef = new WeatherPage(&epd, &paint);
+      break;
     
     default:
       einkPageRef = new ClockPage(&epd, &paint);
@@ -76,6 +80,12 @@ static void page_manager_prepare_page(enum EpdPage page_value) {
     delete page;
 }
 
+static void page_manager_recreate_page() {
+  
+  page_manager_clear();
+  page_manager_prepare_page(current_page);
+}
+
 static void update_pages_task(void *args) {
 
   page_manager_full_clear();
@@ -83,7 +93,7 @@ static void update_pages_task(void *args) {
   page_manager_prepare_page(PAGE_SPLASH);
   page_manager_draw_page();
   vTaskDelay(2500 / portTICK_RATE_MS);
-
+  
   enum EpdPage next_page = storage_manager_has_enrollment_done() ? PAGE_CLOCK : PAGE_ENROLLMENT;
   page_manager_prepare_page(next_page);
 
@@ -98,10 +108,6 @@ static void update_pages_task(void *args) {
 
 static void apds_gesture_handler(void* handler_args, esp_event_base_t base, int32_t id, void* event_data) {
 
-  if (!storage_manager_has_enrollment_done()) {
-    return;
-  }
-
   int gesture_value = 0;
 
   switch (id) {
@@ -113,6 +119,10 @@ static void apds_gesture_handler(void* handler_args, esp_event_base_t base, int3
     case GESTURE_EVENT_RIGHT:
       gesture_value = 1;
       break;  
+
+    case GESTURE_EVENT_NEAR:
+      page_manager_recreate_page();
+      break;
   
     default:
       gesture_value = 0;
@@ -151,5 +161,7 @@ void page_manager_init() {
 
   xTaskCreate(&update_pages_task, "update_pages_task", 4096, NULL, 5, NULL); 
 
-  esp_event_handler_register(GESTURE_EVENTS, ESP_EVENT_ANY_ID, apds_gesture_handler, NULL);
+  if (storage_manager_has_enrollment_done()) {
+    esp_event_handler_register(GESTURE_EVENTS, ESP_EVENT_ANY_ID, apds_gesture_handler, NULL);
+  }
 }

@@ -11,21 +11,20 @@
 
 #define MAX_HTTP_RECV_BUFFER 512
 
-#define WEATHER_TASK_DELAY 15 * 60 * 1000 
+#define WEATHER_TASK_DELAY 10 * 60 * 1000 
 
 static const char *TAG = "Weather-M";
 
 static int weather_data_index = 0;
 static char weather_data[MAX_HTTP_RECV_BUFFER];
 
-static char weather_description[20];
-static enum weather_icons weather_icon = UNKNOWN; 
+static struct weather_data w_data;
 
 static TaskHandle_t weather_task_handler = NULL;
 
 static void weather_manager_parse_data();
 
-static esp_err_t _http_event_handler(esp_http_client_event_t *evt) {
+static esp_err_t http_event_handler(esp_http_client_event_t *evt) {
     switch(evt->event_id) {
         case HTTP_EVENT_ERROR:
             ESP_LOGI(TAG, "HTTP_EVENT_ERROR");
@@ -64,6 +63,59 @@ static void weather_manager_parse_data() {
     
     cJSON *json = cJSON_Parse(weather_data);
     if (json != NULL) {
+
+        cJSON *coordinates = cJSON_GetObjectItemCaseSensitive(json, "coord");
+        if (coordinates != NULL) {
+            cJSON *lat = cJSON_GetObjectItemCaseSensitive(coordinates, "lat");
+            cJSON *lon = cJSON_GetObjectItemCaseSensitive(coordinates, "lon");
+            if (lat != NULL && lon != NULL) {
+                w_data.latitude = lat->valuedouble;
+                w_data.longitude = lon->valuedouble;
+            }
+        }
+
+        cJSON *main_data = cJSON_GetObjectItemCaseSensitive(json, "main");
+        if (main_data != NULL) {
+            cJSON *temp = cJSON_GetObjectItemCaseSensitive(main_data, "temp");
+            cJSON *feels_like = cJSON_GetObjectItemCaseSensitive(main_data, "feels_like");
+            cJSON *temp_min = cJSON_GetObjectItemCaseSensitive(main_data, "temp_min");
+            cJSON *temp_max = cJSON_GetObjectItemCaseSensitive(main_data, "temp_max");
+            cJSON *pressure = cJSON_GetObjectItemCaseSensitive(main_data, "pressure");
+            cJSON *humidity = cJSON_GetObjectItemCaseSensitive(main_data, "humidity");
+
+            if (temp != NULL) {
+                w_data.temp = temp->valuedouble;
+            }
+
+            if (temp_min != NULL) {
+                w_data.temp_min = temp_min->valuedouble;
+            }
+
+            if (temp_max != NULL) {
+                w_data.temp_max = temp_max->valuedouble;
+            }
+
+            if (feels_like != NULL) {
+                w_data.perc_temp = feels_like->valuedouble;
+            }
+
+            if (pressure != NULL) {
+                w_data.pressure = pressure->valueint;
+            }
+
+             if (humidity != NULL) {
+                w_data.humidity = humidity->valueint;
+            }
+        }
+
+        cJSON *wind_data = cJSON_GetObjectItemCaseSensitive(json, "wind");
+        if (wind_data != NULL) {
+            cJSON *speed = cJSON_GetObjectItemCaseSensitive(wind_data, "speed");
+            if (speed != NULL) {
+                w_data.wind_speed = speed->valuedouble;
+            }
+        }
+
         cJSON *weatherArray = cJSON_GetObjectItemCaseSensitive(json, "weather");
         if ( weatherArray != NULL && cJSON_GetArraySize(weatherArray) > 0) {
             
@@ -71,38 +123,63 @@ static void weather_manager_parse_data() {
 
             cJSON *weatherDescription = cJSON_GetObjectItemCaseSensitive(weather, "description");
             if (weatherDescription != NULL && weatherDescription->valuestring != NULL) {
-                strcpy(weather_description, weatherDescription->valuestring);
+                strcpy(w_data.weather_description, weatherDescription->valuestring);
             }
             
+            w_data.weather_icon = UNKNOWN;
             cJSON *weatherIcon = cJSON_GetObjectItemCaseSensitive(weather, "icon");
             if (weatherIcon != NULL && weatherIcon->valuestring != NULL) {
                 if (strcmp(weatherIcon->valuestring, "01d") == 0) {
-                    weather_icon = CLEAR_SKY_DAY;
+                    w_data.weather_icon = CLEAR_SKY_DAY;
                 } else if (strcmp(weatherIcon->valuestring, "01n") == 0) {
-                    weather_icon = CLEAR_SKY_NIGHT;
+                    w_data.weather_icon = CLEAR_SKY_NIGHT;
                 } else if (strcmp(weatherIcon->valuestring, "02d") == 0) {
-                    weather_icon = FEW_CLOUDS_DAY;
+                    w_data.weather_icon = FEW_CLOUDS_DAY;
                 } else if (strcmp(weatherIcon->valuestring, "02n") == 0) {
-                    weather_icon = FEW_CLOUDS_NIGHT;
+                    w_data.weather_icon = FEW_CLOUDS_NIGHT;
                 } else if (strcmp(weatherIcon->valuestring, "03d") == 0 || strcmp(weatherIcon->valuestring, "03n") == 0 || 
                         strcmp(weatherIcon->valuestring, "04d") == 0 || strcmp(weatherIcon->valuestring, "04n") == 0) {
-                    weather_icon = CLOUDS;
+                    w_data.weather_icon = CLOUDS;
                 } else if (strcmp(weatherIcon->valuestring, "09d") == 0 || strcmp(weatherIcon->valuestring, "09n") == 0) {
-                    weather_icon = SHOWER_RAIN;
+                    w_data.weather_icon = SHOWER_RAIN;
                 } else if (strcmp(weatherIcon->valuestring, "10d") == 0 || strcmp(weatherIcon->valuestring, "10n") == 0) {
-                    weather_icon = RAIN;
+                    w_data.weather_icon = RAIN;
                 } else if (strcmp(weatherIcon->valuestring, "11d") == 0 || strcmp(weatherIcon->valuestring, "11n") == 0) {
-                    weather_icon = THUNDERSTORM;
+                    w_data.weather_icon = THUNDERSTORM;
                 } else if (strcmp(weatherIcon->valuestring, "13d") == 0 || strcmp(weatherIcon->valuestring, "13n") == 0) {
-                    weather_icon = SNOW;
+                    w_data.weather_icon = SNOW;
                 } else if (strcmp(weatherIcon->valuestring, "50d") == 0 || strcmp(weatherIcon->valuestring, "50n") == 0) {
-                    weather_icon = FOG;
+                    w_data.weather_icon = FOG;
                 }
             }
         }
     }
 
     cJSON_Delete(json);
+}
+
+static void weather_manager_perform_request(char *request_url) {
+
+    weather_data_index = 0;
+
+    esp_http_client_config_t config = {
+        .url = request_url,
+        .event_handler = http_event_handler
+    };
+
+    esp_http_client_handle_t client; 
+
+    client = esp_http_client_init(&config);
+    esp_err_t err = esp_http_client_perform(client);
+    if (err == ESP_OK) {
+        ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %d",
+                esp_http_client_get_status_code(client),
+                esp_http_client_get_content_length(client));
+    } else {
+        ESP_LOGE(TAG, "HTTP GET request failed: %s", esp_err_to_name(err));
+    }
+
+    esp_http_client_cleanup(client);
 }
 
 static void update_weather_task(void *pvParameters) {
@@ -118,33 +195,10 @@ static void update_weather_task(void *pvParameters) {
 
     free(api_key); 
 
-    esp_http_client_config_t config = {
-        .url = request,
-        .event_handler = _http_event_handler
-    };
-
-    esp_http_client_handle_t client; 
-
-    esp_err_t err;
-
     while (1) {
-
-        weather_data_index = 0;
-
-        client = esp_http_client_init(&config);
-        err = esp_http_client_perform(client);
-        if (err == ESP_OK) {
-            ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %d",
-                    esp_http_client_get_status_code(client),
-                    esp_http_client_get_content_length(client));
-        } else {
-            ESP_LOGE(TAG, "HTTP GET request failed: %s", esp_err_to_name(err));
-        }
-
-        esp_http_client_cleanup(client);
-
+        weather_manager_perform_request(request);
         vTaskDelay(WEATHER_TASK_DELAY / portTICK_RATE_MS);
-   } 
+    } 
 
    vTaskDelete(NULL);
 }
@@ -160,10 +214,6 @@ void weather_manager_deinit() {
     }
 }
 
-char* weather_manager_get_weather_description() {
-    return weather_description;
-}
-
-enum weather_icons weather_manager_get_weather_icon() {
-    return weather_icon;
+struct weather_data* weather_manager_get_weather_data() {
+    return &w_data;
 }

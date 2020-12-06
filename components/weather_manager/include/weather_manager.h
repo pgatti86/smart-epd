@@ -3,12 +3,24 @@
 
 #include "weather_icons.h"
 
+struct weather_data {
+   double  temp;
+   double  perc_temp;
+   double  temp_min;
+   double  temp_max;
+   int  pressure;
+   int  humidity;
+   double wind_speed;
+   char weather_description[20];
+   enum weather_icons weather_icon;
+   double latitude;
+   double longitude;
+};
+
 void weather_manager_init();
 
 void weather_manager_deinit();
 
-char* weather_manager_get_weather_description();
-
-enum weather_icons weather_manager_get_weather_icon();
+struct weather_data* weather_manager_get_weather_data();
 
 #endif 
