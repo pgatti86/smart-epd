@@ -4,35 +4,35 @@ Smart-epd is a study project for the esp32 IDF framework.
 
 The final scope is to build an alarm clock with some added features like temperature and humidity monitoring, local weather infos, and OTA updates.
 
-[![smart-epd.jpg](https://i.postimg.cc/7hjTc85C/smart-epd.jpg)](https://postimg.cc/30CR4qC7)
+[comment]:[smart-epd.jpg](https://i.postimg.cc/7hjTc85C/smart-epd.jpg)](https://postimg.cc/30CR4qC7)
+[![smart-epd.jpg](https://i.postimg.cc/W4xnvr2g/20201206-211905-COLLAGE.jpg)](https://postimg.cc/Z9F3PWv5)
 
+As the project evolved, I wanted to add some optional features, such as the ability to use gestures to change the page displayed on the clock.
+In the 3d-print folder you will find both versions of clock body, with and withoud the gesture module housing.
+
+ 
 ## BOM
 
 - Any [esp32](https://live.staticflickr.com/4764/40089095211_ec1fee0087_b.jpg) breakout board (with at least 4MB flash size)
 - [Waveshare 2.9inch E-paper Module b/w](https://www.waveshare.com/wiki/2.9inch_e-Paper_Module) (296x128 px)
 - [DHT22 temperature and humidity module](https://imgaz.staticbg.com/thumb/large/2014/xiemeijuan/07/SKU146979/SKU146979a.jpg)
-- [APDS-9960 module](https://learn.sparkfun.com/tutorials/apds-9960-rgb-and-gesture-sensor-hookup-guide/all)
+- [APDS-9960 module](https://learn.sparkfun.com/tutorials/apds-9960-rgb-and-gesture-sensor-hookup-guide/all) (optional)
 - USB-A to micro USB-B cable
 
-Depending on the store from which you buy the material, the price can vary between 30€ and 50€
+Depending on the store from which you buy the material, the price can vary between 40€ and 50€
 
 DHT22 requires a pullup resistor. I recommend buying a module that integrates resistor and sensor like the one visible in the link above.
 
 ## Getting Started
 
-This project is based on Espressif IDF v4.0 (stable branch at writing time).
-Follow this link to configure your environment: [esp idf v4.0](https://docs.espressif.com/projects/esp-idf/en/v4.0/get-started/index.html)
-
-Note: depending on your python virtualenv version you may encounter an error while running ESP install script (install.sh).
-To solve simply remove the invalid option (--no-site-packages) from idf_tools.py 
-
-However the project is compatible with more updated versions of the framework such as IDF 4.1
+This project is based on Espressif IDF v4.1 (stable branch at writing time).
+Follow this link to configure your environment: [esp idf v4.1](https://docs.espressif.com/projects/esp-idf/en/v4.1/get-started/index.html)
 
 To clone this project use **git clone --recursive git@gitlab.com:paolo.gatti/smart-epd.git** 
 
-This repo depends on a couple of libraries as git submodules:
-- epd [library](https://github.com/pgatti86/epd) 
-- apds9960 [library](https://github.com/pgatti86/apds9960-idf)
+This repo depends on a couple of mine libraries as git submodules:
+- epd [library](https://github.com/pgatti86/epd) (handles Eink screen)
+- apds9960 [library](https://github.com/pgatti86/apds9960-idf) (handles gesture module)
 
 Project Makefile has the following configuration to include the submodule library in the build process:
 
@@ -40,7 +40,7 @@ Project Makefile has the following configuration to include the submodule librar
 
 ## Configurations
 
-Before flashing the app you will need to configure the device with **make menuconfig** command:
+Before flashing the app you will need to configure the device with **make menuconfig** command or **idf.py menuconfig**
 
 ### App settings
 
@@ -49,11 +49,11 @@ Enter SMART-EPD config menu to configure the application (some defaults values a
 - SNTP_SERVER: defaults to "pool.ntp.org"
 - OTA_SERVER: https server that hosts your generated bin file. 
 - DHT_GPIO: reads temperature and humidity from DHT22 on specified GPIO. Defauts to GPIO 4
-- BUTTON_GPIO: wipes the device memory when holded longer then 3s. Defaults to 0 (builtin button)
+- BUTTON_GPIO: wipes the device memory when holded longer then 3s. Defaults to 0 (builtin button on my board)
 - MAX_REWRITE_COUNT: number of screen rewrite before eink full clean apply. Defualts to 3600
 - SCL: i2c scl pin. Defaults to 22
 - SDA: i2c sda pin. Defaults to 21
-- APDS_INT: Apds9969 interrupt GPIO. Defaults to 19
+- APDS_INT: Apds9960 interrupt GPIO. Defaults to 19
 
 Save and return to the main menu.
 
@@ -70,7 +70,7 @@ The minimum size required is 4MB.
 
 Save and exit.
 
-Back in CLI run **make** command. It will take a while, have a coffee ;)
+Back in CLI run **make** or **idf.py build** command. It will take a while, have a coffee ;)
 You can check partition table with **make partition_table** command.
 
 ### Open weather API key
@@ -178,7 +178,9 @@ The response to this POST request will be the previously configured UUID.
 You can reset the device pressing and holding the right module button (builtin) for at least 3 seconds.
 After reset the device will return in enrollment mode.
 
-## How connect eink display
+## Defaults connections
+
+### eink display
 
 | Signal | GPIO |
 | --- | --- |
@@ -188,6 +190,24 @@ After reset the device will return in enrollment mode.
 | DC | GPIO_NUM_26  |
 | RST | GPIO_NUM_27  |
 | BUSY | GPIO_NUM_32  |
+
+### DHT
+
+| Signal | GPIO |
+| --- | --- |
+| VCC | 3.3V |
+| GND | GND |
+| DATA | GPIO_NUM_4 |
+
+### APDS-9960 (optional)
+
+| Signal | GPIO | 
+|---|---|
+| VCC | 3.3V |
+| GND | GND |
+| SDA | GPIO_NUM_21 |
+| SCL | GPIO_NUM_22 |
+| INT | GPIO_NUM_19 |
 
 ## OTA
 
